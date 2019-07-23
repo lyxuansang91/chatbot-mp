@@ -56,7 +56,7 @@ zaloUserSchema.statics = {
   },
 
   list({
-    page = 1, perPage = 50,
+    page = 1, perPage = 100,
   }) {
     const options = omitBy({ fromuid }, isNil);
 
