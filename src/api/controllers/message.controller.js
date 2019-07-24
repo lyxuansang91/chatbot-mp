@@ -12,9 +12,9 @@ exports.send = async (req, res) => {
   try {
     const type = req.body.type;
 
-    const { uid, message, link, linktitle, linkdes, linkthumb  } = req.body
+    const { user_ids, message, link, linktitle, linkdes, linkthumb  } = req.body
 
-    if (!uid) {
+    if (!user_ids) {
       const users = await ZaloUser.list({ page: 1, perPage: 100})
 
       users.forEach(user => {
@@ -29,14 +29,16 @@ exports.send = async (req, res) => {
         }
       });
     } else {
-      switch(type) {
-        case 'text':  
-          sendTextMessage(uid, message);
-        break;
-        case 'text_link':
-          sendTextLink(uid, link, linktitle, linkdes, linkthumb)
-        break;
-      }
+      user_ids.forEach(uid => {
+        switch(type) {
+          case 'text':  
+            sendTextMessage(uid, message);
+          break;
+          case 'text_link':
+            sendTextLink(uid, link, linktitle, linkdes, linkthumb)
+          break;
+        }
+      })
     }
 
     
