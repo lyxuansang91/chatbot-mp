@@ -1,6 +1,6 @@
 /*eslint-disable */
 const express = require('express');
-const controller = require('../../controllers/message.controller');
+const controller = require('../../controllers/message.controller');
 
 const router = express.Router();
 
