@@ -58,9 +58,8 @@ zaloUserSchema.statics = {
   list({
     page = 1, perPage = 100,
   }) {
-    const options = omitBy({ fromuid }, isNil);
 
-    return this.find(options)
+    return this.find()
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
