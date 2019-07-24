@@ -12,7 +12,7 @@ exports.send = async (req, res) => {
   try {
     const type = req.body.type;
 
-    const { user_ids, message, link, linktitle, linkdes, linkthumb  } = req.body
+    const { userIds, message, link, linktitle, linkdes, linkthumb  } = req.body
 
     if (!user_ids) {
       const users = await ZaloUser.list({ page: 1, perPage: 100})
@@ -29,7 +29,7 @@ exports.send = async (req, res) => {
         }
       });
     } else {
-      user_ids.forEach(uid => {
+      userIds.forEach(uid => {
         switch(type) {
           case 'text':  
             sendTextMessage(uid, message);
@@ -58,6 +58,20 @@ exports.uploadMedia = async (req, res) => {
   }
 };
 
+exports.getMessageHistory = async (req, res) => {
+  try{
+    let { page, limit: perPage, userId: fromuid, status } = req.query
+    page = page ? Number(page) : 1
+    perPage = perPage ? Number(perPage) : 100
+
+    const messages = await Message.list({page, perPage, fromuid, status});
+    const transformedMessages = messages.map(message => message.transform());
+
+    res.json({ status: "success", "data": transformedMessages })
+  } catch (error) {
+    res.json({ status: "failed", message: error.message });
+  }
+}
 
 uploadMedia = async () => {
   var fileUrl =

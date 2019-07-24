@@ -1,6 +1,7 @@
 /*eslint-disable */
 
 const mongoose = require('mongoose');
+const { omitBy, isNil } = require('lodash');
 
 
 /**
@@ -33,6 +34,18 @@ const messageSchema = new mongoose.Schema({
   timestamps: true,
 });
 
+messageSchema.method({
+  transform() {
+    const transformed = {};
+    const fields = ['id', 'messageType', 'status', 'retry', 'zaloMessageId', 'uid', 'createdAt', 'updatedAt'];
+
+    fields.forEach((field) => {
+      transformed[field] = this[field];
+    });
+
+    return transformed;
+  },
+})
 
 messageSchema.statics = {
 
@@ -45,11 +58,33 @@ messageSchema.statics = {
   },
 
   list({
-    page = 1, perPage = 50,
+    page = 1, perPage = 100, fromuid, status
   }) {
-    const options = omitBy({ fromuid }, isNil);
+    if (fromuid) {
+      if (status) {
+        return this.find({fromuid, status})
+        .sort({ createdAt: -1 })
+        .skip(perPage * (page - 1))
+        .limit(perPage)
+        .exec();
+      } else {
+        return this.find({fromuid})
+        .sort({ createdAt: -1 })
+        .skip(perPage * (page - 1))
+        .limit(perPage)
+        .exec();
+      }
+    }
 
-    return this.find(options)
+    if (status) {
+      return this.find({status})
+        .sort({ createdAt: -1 })
+        .skip(perPage * (page - 1))
+        .limit(perPage)
+        .exec();
+    }
+
+    return this.find({})
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
@@ -59,9 +94,7 @@ messageSchema.statics = {
   listFailed({
     page = 1, perPage = 50,
   }) {
-    const options = omitBy({ status }, 'failed');
-
-    return this.find(options)
+    return this.find({ status: 'failed' })
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
@@ -71,9 +104,7 @@ messageSchema.statics = {
   listSuccess({
     page = 1, perPage = 50,
   }) {
-    const options = omitBy({ status }, 'success');
-
-    return this.find(options)
+    return this.find({ status: 'success' })
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
