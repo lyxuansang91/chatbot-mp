@@ -15,10 +15,10 @@ exports.send = async (req, res) => {
     const { uid, message, link, linktitle, linkdes, linkthumb  } = req.body
 
     if (!uid) {
-      const users = await ZaloUser.list()
+      const users = await ZaloUser.list({ page: 1, perPage: 100})
 
       users.forEach(user => {
-        const uid = user.uid;
+        const uid = user.fromuid;
         switch(type) {
           case 'text':  
             sendTextMessage(uid, message);
@@ -69,16 +69,28 @@ sendTextMessage = async (uid, message) => {
   ZaloClient.api("sendmessage/text", "POST", { uid, message }, function(
     response
   ) {
-    const zaloMessageId = response.data.msgId
-    const data = {
-      zaloMessageId,
-      uid,
-      messageType: 'text',
-      message,
-      status: response.errorMsg === 'Success' ? 'success' : 'failed'
+    if (response.data && response.data.msgId) {
+      const zaloMessageId = response.data.msgId
+      const data = {
+        zaloMessageId,
+        uid,
+        messageType: 'text',
+        message,
+        status: response.errorMsg === 'Success' ? 'success' : 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()
+    } else {
+      const data = {
+        zaloMessageId: null,
+        uid,
+        messageType: 'text',
+        message,
+        status: 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()
     }
-    const msg = new Message(data);
-    msg.save()
   });
 };
 
@@ -94,19 +106,30 @@ sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
     ]
   }
   ZaloClient.api("sendmessage/links", "POST", { uid, ...message }, function(response) {
-    console.log(response);
-
-    const zaloMessageId = response.data.msgId
-    const data = {
-      zaloMessageId,
-      uid,
-      messageType: 'text_link',
-      message: JSON.stringify(message),
-      status: response.errorMsg === 'Success' ? 'success' : 'failed'
+    if (response.data && response.data.msgId) {
+      const zaloMessageId = response.data.msgId
+      const data = {
+        zaloMessageId,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: response.errorMsg === 'Success' ? 'success' : 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()  
+    } else {
+      const data = {
+        zaloMessageId: null,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()
     }
-    const msg = new Message(data);
-    msg.save()
   });
+
 };
 
 sendInteractiveMessage = async (uid) => {
