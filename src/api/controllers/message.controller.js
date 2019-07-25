@@ -12,7 +12,7 @@ exports.send = async (req, res) => {
   try {
     const type = req.body.type;
 
-    const { userIds, message, link, linktitle, linkdes, linkthumb  } = req.body
+    const { user_ids: userIds, message, link, title: linktitle, description: linkdes, thumbnail: linkthumb  } = req.body
 
     if (!userIds) {
       const users = await ZaloUser.list({ page: 1, perPage: 100})
