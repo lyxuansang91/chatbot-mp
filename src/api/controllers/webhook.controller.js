@@ -108,8 +108,10 @@ handleUserMessage = async (req, res) => {
   }).then((response) => {
     const results = response.data
     if (results && results.hits && results.hits.length > 0) {
-      const pickedResult = results.hits[0];
-      sendTextLink(userId, pickedResult.pageURL, pickedResult.user, pickedResult.tags, pickedResult.previewURL)
+      const pickedResult = results.hits[Math.floor(Math.random()*results.hits.length)];
+      sendTextLink(userId, pickedResult.pageURL, pickedResult.user, pickedResult.tags, pickedResult.largeImageURL)
+    } else {
+      sendTextMessage(userId, "Sorry, no result!!!")
     }
   }).catch((e) => {
     console.log(e)
@@ -140,6 +142,33 @@ handleMessage = async req => {
     });
   }
 };
+
+
+sendTextMessage = async (uid, message) => {
+  ZaloClient.api("sendmessage/text", "POST", { uid, message }, function(
+    response
+  ) {
+    if (response.data && response.data.msgId) {
+      const zaloMessageId = response.data.msgId
+      const data = {
+        zaloMessageId,
+        uid,
+        messageType: 'text',
+        message,
+        status: response.errorMsg === 'Success' ? 'success' : 'failed'
+      }
+    } else {
+      const data = {
+        zaloMessageId: null,
+        uid,
+        messageType: 'text',
+        message,
+        status: 'failed'
+      }
+    }
+  });
+};
+
 
 sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
   var message = {
