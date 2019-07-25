@@ -2,6 +2,7 @@
 const express = require('express');
 const controller = require('../../controllers/message.controller');
 const validate = require('express-validation');  
+const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
 
 const {
   getMessage,
@@ -10,10 +11,10 @@ const {
 const router = express.Router();
 
 router
-  .get('/', validate(getMessage),controller.getMessageHistory)
-  .post('/', controller.send);
+  .get('/', authorize(ADMIN), validate(getMessage),controller.getMessageHistory)
+  .post('/', authorize(ADMIN), controller.send);
 
 router
-  .post('/media', controller.uploadMedia);
+  .post('/media', authorize(ADMIN), controller.uploadMedia);
 
 module.exports = router;
