@@ -14,7 +14,7 @@ exports.send = async (req, res) => {
 
     const { userIds, message, link, linktitle, linkdes, linkthumb  } = req.body
 
-    if (!user_ids) {
+    if (!userIds) {
       const users = await ZaloUser.list({ page: 1, perPage: 100})
 
       users.forEach(user => {
