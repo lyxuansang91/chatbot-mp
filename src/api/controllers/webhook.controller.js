@@ -13,10 +13,9 @@ const ZaloUser = require("../models/zalouser.model");
 
 exports.get = async (req, res) => {
   try {
-      console.log('req.body', req.query)
-    const event = req.query.event;
+    console.log('req.body', req.body)
+    const event = req.body.event;
 
-    console.log('event', event);
 
     switch (event) {
       case "follow":
@@ -44,16 +43,16 @@ exports.create = async (req, res) => {
 handleFollow = async (req, res) => {
   try {
     const data = {
-        fromuid: req.query.fromuid,
-        phone: req.query.phone,
-        appid: req.query.appid,
-        pageid: req.query.pageid,
-        oaid: req.query.oaid,
-        mac: req.query.mac,
+        fromuid: req.body.fromuid,
+        phone: req.body.phone,
+        appid: req.body.appid,
+        pageid: req.body.pageid,
+        oaid: req.body.oaid,
+        mac: req.body.mac,
         status: 'follow'
     }
 
-    const checkUser = await ZaloUser.findByZaloUserId(req.query.fromuid)
+    const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid)
 
     if (!checkUser) {
         const user = new ZaloUser(data);
@@ -78,7 +77,7 @@ handleFollow = async (req, res) => {
 
 handleUnfollow = async (req, res) => {
     try {
-        const checkUser = await ZaloUser.findByZaloUserId(req.query.fromuid)
+        const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid)
     
         if (checkUser) {
             checkUser.status = 'unfollow';
@@ -94,7 +93,7 @@ handleUnfollow = async (req, res) => {
 };
 
 handleUserMessage = async (req, res) => {
-  const data = req.query;
+  const data = req.body;
   const message = data.message;
   const userId = data.fromuid;
 
@@ -120,7 +119,7 @@ handleUserMessage = async (req, res) => {
 
 handleMessage = async req => {
   console.log(req.body);
-  var data = req.query;
+  var data = req.body;
   var message = data.message;
   var userId = data.fromuid;
   console.log(data);
