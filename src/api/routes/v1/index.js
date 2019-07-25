@@ -23,6 +23,6 @@ router.use('/docs', express.static('docs'));
 router.use('/users', userRoutes);
 router.use('/auth', authRoutes);
 router.use('/webhook', webhookRoutes);
-router.use('/message', messageRoutes);
+router.use('/messages', messageRoutes);
 
 module.exports = router;

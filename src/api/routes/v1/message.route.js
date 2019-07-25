@@ -12,7 +12,7 @@ const router = express.Router();
 
 router
   /**
-  * @api {get} v1/message List Zalo messages
+  * @api {get} v1/messages List Zalo messages
   * @apiDescription Get a list Zalo messages that's already sent to users
   * @apiVersion 1.0.0
   * @apiName Get messages
@@ -34,7 +34,7 @@ router
   */
   .get('/', authorize(ADMIN), validate(getMessage),controller.getMessageHistory)
   /**
-   * @api {post} v1/message Send zalo messages
+   * @api {post} v1/messages Send Zalo messages
    * @apiDescription Send Zalo message to users
    * @apiVersion 1.0.0
    * @apiName Send message
