@@ -30,7 +30,7 @@ router
    * @apiHeader {String} Authorization   User's access token
    *
    * @apiParam  {Number{1-}}         [page=1]     List page
-   * @apiParam  {Number{1-100}}      [perPage=1]  Users per page
+   * @apiParam  {Number{1-100}}      [limit=1]  Users per page
    * @apiParam  {String}             [name]       User's name
    * @apiParam  {String}             [email]      User's email
    * @apiParam  {String=user,admin}  [role]       User's role
