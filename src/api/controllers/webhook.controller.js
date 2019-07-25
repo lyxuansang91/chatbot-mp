@@ -4,6 +4,7 @@ const httpStatus = require("http-status");
 const { omit } = require("lodash");
 var ZaloOA = require("zalo-sdk").ZaloOA;
 var request = require("request");
+const axios = require('axios');
 
 const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
@@ -23,6 +24,9 @@ exports.get = async (req, res) => {
         break;
       case "unfollow":
         await handleUnfollow(req, res);
+        break;
+      case "sendmsg":
+        await handleUserMessage(req, res);
         break;
     }
 
@@ -89,6 +93,29 @@ handleUnfollow = async (req, res) => {
       }
 };
 
+handleUserMessage = async (req, res) => {
+  const data = req.query;
+  const message = data.message;
+  const userId = data.fromuid;
+
+  axios.get('https://pixabay.com/api/', {
+    params: {
+      key: '12791370-e3ec2f19769e143cf190f1a8f',
+      'image_type': 'photo', 
+      'lang': 'en',
+      'q': message
+    }
+  }).then((response) => {
+    const results = response.data
+    if (results && results.hits && results.hits.length > 0) {
+      const pickedResult = results.hits[0];
+      sendTextLink(userId, pickedResult.pageURL, pickedResult.user, pickedResult.tags, pickedResult.previewURL)
+    }
+  }).catch((e) => {
+    console.log(e)
+  })
+}
+
 handleMessage = async req => {
   console.log(req.body);
   var data = req.query;
@@ -112,4 +139,42 @@ handleMessage = async req => {
       );
     });
   }
+};
+
+sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
+  var message = {
+    links: [
+      {
+        link,
+        linktitle,
+        linkdes,
+        linkthumb
+      }
+    ]
+  }
+  ZaloClient.api("sendmessage/links", "POST", { uid, ...message }, function(response) {
+    if (response.data && response.data.msgId) {
+      const zaloMessageId = response.data.msgId
+      const data = {
+        zaloMessageId,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: response.errorMsg === 'Success' ? 'success' : 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()  
+    } else {
+      const data = {
+        zaloMessageId: null,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: 'failed'
+      }
+      const msg = new Message(data);
+      msg.save()
+    }
+  });
+
 };
