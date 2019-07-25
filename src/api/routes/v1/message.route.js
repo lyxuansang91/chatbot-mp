@@ -23,7 +23,7 @@ router
   *
   * @apiParam  {Number{1}}         [page=1]     List page
   * @apiParam  {Number{1-100}}      [limit=100]  Users per page
-  * @apiParam  {String}             [userId]       User's id
+  * @apiParam  {String}             [user_id]       User's id
   * @apiParam  {String=success,failed}             [status]      User's status
   *
   * @apiSuccess {String=success,failed}  status         Response's status
