@@ -43,7 +43,7 @@ router
    *
    * @apiHeader {String} Authorization   User's access token
    *
-   * @apiParam  {Array}               [user_ids]     List of user ids to send message
+   * @apiParam  {Array}               [user_ids]     List of user ids to send message. Set null if you want to send to all users
    * @apiParam  {String=text,text_link}              [message]      Type of message
    * @apiParam  {String}              [message]      Message content if user sends text message
    * @apiParam  {String}             [link]          Message's link
