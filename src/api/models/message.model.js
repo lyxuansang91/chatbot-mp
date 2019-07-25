@@ -37,7 +37,7 @@ const messageSchema = new mongoose.Schema({
 messageSchema.method({
   transform() {
     const transformed = {};
-    const fields = ['id', 'messageType', 'status', 'retry', 'zaloMessageId', 'uid', 'createdAt', 'updatedAt'];
+    const fields = ['id', 'messageType', 'message', 'status', 'retry', 'zaloMessageId', 'uid', 'createdAt', 'updatedAt'];
 
     fields.forEach((field) => {
       transformed[field] = this[field];
