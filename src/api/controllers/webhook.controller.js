@@ -14,8 +14,7 @@ const ZaloUser = require("../models/zalouser.model");
 exports.get = async (req, res) => {
   try {
     console.log('req.body', req.body)
-    const event = req.body.event;
-
+    const event = req.body.event_name;
 
     switch (event) {
       case "follow":
