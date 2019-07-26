@@ -24,7 +24,7 @@ exports.get = async (req, res) => {
       case "unfollow":
         await handleUnfollow(req, res);
         break;
-      case "sendmsg":
+      case "user_send_text":
         await handleUserMessage(req, res);
         break;
     }
@@ -43,12 +43,12 @@ exports.create = async (req, res) => {
 handleFollow = async (req, res) => {
   try {
     const data = {
-        fromuid: req.body.fromuid,
+        fromuid: req.body.follower.id,
+        userIdByApp: req.body.user_id_by_app,
         phone: req.body.phone,
-        appid: req.body.appid,
+        appid: req.body.app_id,
         pageid: req.body.pageid,
-        oaid: req.body.oaid,
-        mac: req.body.mac,
+        oaid: req.body.oa_id,
         status: 'follow'
     }
 
@@ -95,7 +95,7 @@ handleUnfollow = async (req, res) => {
 handleUserMessage = async (req, res) => {
   const data = req.body;
   const message = data.message;
-  const userId = data.fromuid;
+  const userId = data.sender.id;
 
   axios.get('https://pixabay.com/api/', {
     params: {
