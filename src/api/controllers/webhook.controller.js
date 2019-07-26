@@ -13,7 +13,7 @@ const ZaloUser = require("../models/zalouser.model");
 
 exports.get = async (req, res) => {
   try {
-    console.log('req.body', req.body)
+    // console.log('req.body', req.body)
     const event = req.body.event_name;
 
     switch (event) {
@@ -93,7 +93,7 @@ handleUnfollow = async (req, res) => {
 
 handleUserMessage = async (req, res) => {
   const data = req.body;
-  const message = data.message;
+  const message = data.message.text;
   const userId = data.sender.id;
 
   axios.get('https://pixabay.com/api/', {
