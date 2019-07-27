@@ -14,6 +14,7 @@ exports.send = async (req, res) => {
       user_ids: userIds,
       type,
       link,
+      message,
       title: linktitle,
       description: linkdes,
       thumbnail: linkthumb,
