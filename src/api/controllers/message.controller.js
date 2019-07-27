@@ -121,35 +121,31 @@ sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
     ],
   };
 
-  ZaloClient.api(
-    'sendmessage/links',
-    'POST',
-    { uid, link, linktitle, linkdes, linkthumb },
-    function(response) {
-      if (response.data && response.data.msgId) {
-        const zaloMessageId = response.data.msgId;
-        const data = {
-          zaloMessageId,
-          uid,
-          messageType: 'text_link',
-          message: JSON.stringify(message),
-          status: response.errorMsg === 'Success' ? 'success' : 'failed',
-        };
-        const msg = new Message(data);
-        msg.save();
-      } else {
-        const data = {
-          zaloMessageId: null,
-          uid,
-          messageType: 'text_link',
-          message: JSON.stringify(message),
-          status: 'failed',
-        };
-        const msg = new Message(data);
-        msg.save();
-      }
-    },
-  );
+  ZaloClient.api('sendmessage/links', 'POST', { uid, ...message }, function(response) {
+    console.log('response:', response);
+    if (response.data && response.data.msgId) {
+      const zaloMessageId = response.data.msgId;
+      const data = {
+        zaloMessageId,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: response.errorMsg === 'Success' ? 'success' : 'failed',
+      };
+      const msg = new Message(data);
+      msg.save();
+    } else {
+      const data = {
+        zaloMessageId: null,
+        uid,
+        messageType: 'text_link',
+        message: JSON.stringify(message),
+        status: 'failed',
+      };
+      const msg = new Message(data);
+      msg.save();
+    }
+  });
 };
 
 sendInteractiveMessage = async uid => {
