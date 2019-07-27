@@ -11,13 +11,8 @@ const ZaloUser = require('../models/zalouser.model');
 
 exports.get = async (req, res) => {
   try {
-<<<<<<< HEAD
-    console.log('req.body', req.body);
-    const event = req.body.event;
-=======
     // console.log('req.body', req.body)
     const event = req.body.event_name;
->>>>>>> ef8d528356d957eb2cd76bfea1c872423b55c9e8
 
     switch (event) {
       case 'follow':
@@ -26,11 +21,7 @@ exports.get = async (req, res) => {
       case 'unfollow':
         await handleUnfollow(req, res);
         break;
-<<<<<<< HEAD
-      case 'sendmsg':
-=======
-      case "user_send_text":
->>>>>>> ef8d528356d957eb2cd76bfea1c872423b55c9e8
+      case 'user_send_text':
         await handleUserMessage(req, res);
         break;
     }
@@ -49,14 +40,14 @@ exports.create = async (req, res) => {
 handleFollow = async (req, res) => {
   try {
     const data = {
-        fromuid: req.body.follower.id,
-        userIdByApp: req.body.user_id_by_app,
-        phone: req.body.phone,
-        appid: req.body.app_id,
-        pageid: req.body.pageid,
-        oaid: req.body.oa_id,
-        status: 'follow'
-    }
+      fromuid: req.body.follower.id,
+      userIdByApp: req.body.user_id_by_app,
+      phone: req.body.phone,
+      appid: req.body.app_id,
+      pageid: req.body.pageid,
+      oaid: req.body.oa_id,
+      status: 'follow',
+    };
 
     const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid);
 
