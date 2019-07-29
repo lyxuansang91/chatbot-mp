@@ -45,7 +45,8 @@ exports.upload = async (req, res) => {
                     file_name: req.file.originalname,
                     file_type: req.file.mimetype,
                     file_size: req.file.size,
-                    file_url: req.protocol + '://' + req.get('host') + "/" + req.file.path
+                    file_url: process.env.NODE_ENV === 'development' ? req.protocol + '://' + req.get('host') : process.env.BASE_URL
+                     + "/" + req.file.path
                 }
             });
           })
