@@ -6,6 +6,7 @@ const userRoutes = require('./user.route');
 const authRoutes = require('./auth.route');
 const webhookRoutes = require('./webhook.route');
 const messageRoutes = require('./message.route');
+const fileRoutes = require('./file.route');
 
 const router = express.Router();
 
@@ -25,5 +26,6 @@ router.use('/users', userRoutes);
 router.use('/auth', authRoutes);
 router.use('/webhook', webhookRoutes);
 router.use('/messages', messageRoutes);
+router.use('/files', fileRoutes);
 
 module.exports = router;
