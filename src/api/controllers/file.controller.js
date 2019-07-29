@@ -26,21 +26,21 @@ exports.upload = async (req, res) => {
               // A Multer error occurred when uploading.
               console.log(error);
               res.json({
-                status: false,
+                status: 'failed',
                 message: error.message
                 });
             } else if (err) {
               // An unknown error occurred when uploading.
               console.log(error);
               res.json({
-                status: false,
+                status: 'failed',
                 message: error.message
                 });
             }
         
             console.log(req.file)
             res.json({
-                success: true,
+                status: 'success',
                 data: {
                     file_name: req.file.originalname,
                     file_type: req.file.mimetype,
