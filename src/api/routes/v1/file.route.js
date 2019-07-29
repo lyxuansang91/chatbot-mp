@@ -8,6 +8,6 @@ const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
 const router = express.Router();
 
 router
-  .post('/upload', controller.upload);
+  .post('/upload', authorize(ADMIN), controller.upload);
 
 module.exports = router;
