@@ -38,11 +38,15 @@ exports.upload = async (req, res) => {
                 });
             }
         
-            // console.log(req.file.path)
-            // Everything went fine.
+            console.log(req.file)
             res.json({
                 success: true,
-                file_url: req.headers.host + "/" + req.file.path
+                data: {
+                    file_name: req.file.originalname,
+                    file_type: req.file.mimetype,
+                    file_size: req.file.size,
+                    file_url: req.protocol + '://' + req.get('host') + "/" + req.file.path
+                }
             });
           })
       } catch (error) {
