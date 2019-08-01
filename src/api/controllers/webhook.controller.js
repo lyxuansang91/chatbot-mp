@@ -93,10 +93,11 @@ handleUnfollow = async (req, res) => {
 handleUserMessage = async (req, res) => {
   const data = req.body;
   const message = data.message.text;
+  const messageId = response.data.message.msg_id
   const userId = data.sender.id;
 
   const customerMessage = {
-    zaloMessageId: response.data.msgId,
+    zaloMessageId: messageId,
     uid,
     messageType: 'customer_message',
     message,
