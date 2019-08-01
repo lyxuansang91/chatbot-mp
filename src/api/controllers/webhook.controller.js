@@ -12,7 +12,7 @@ const Message = require('../models/message.model');
 
 exports.get = async (req, res) => {
   try {
-    console.log('zalo request', req.body)
+    console.log('zalo request', JSON.stringify(req.body))
     const event = req.body.event_name;
 
     switch (event) {
@@ -93,7 +93,7 @@ handleUnfollow = async (req, res) => {
 handleUserMessage = async (req, res) => {
   const data = req.body;
   const message = data.message.text;
-  const messageId = response.data.message.msg_id
+  const messageId = data.message.msg_id
   const userId = data.sender.id;
 
   const customerMessage = {
