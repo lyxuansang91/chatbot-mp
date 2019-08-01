@@ -8,10 +8,11 @@ const axios = require('axios');
 
 const ZaloClient = require('../services/zaloService').ZaloClient;
 const ZaloUser = require('../models/zalouser.model');
+const Message = require('../models/message.model');
 
 exports.get = async (req, res) => {
   try {
-    // console.log('req.body', req.body)
+    console.log('zalo request', req.body)
     const event = req.body.event_name;
 
     switch (event) {
@@ -93,6 +94,16 @@ handleUserMessage = async (req, res) => {
   const data = req.body;
   const message = data.message.text;
   const userId = data.sender.id;
+
+  const customerMessage = {
+    zaloMessageId: response.data.msgId,
+    uid,
+    messageType: 'customer_message',
+    message,
+    status: 'success',
+  };
+  const msg = new Message(customerMessage);
+  await msg.save();
 
   axios
     .get('https://pixabay.com/api/', {
