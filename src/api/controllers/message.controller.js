@@ -97,7 +97,9 @@ exports.send = async (req, res) => {
       }
     });
 
-    res.json({ status: "success" });
+    res.json({ status: "success", message: {
+      user_ids: uid, link, title: linktitle, description: linkdes, thumbnail: linkthumb
+    } });
   } catch (error) {
     res.json({ status: "failed", message: error.message });
   }
@@ -206,27 +208,27 @@ sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
   });
 };
 
-sendInteractiveMessage = async uid => {
-  var params = {
-    uid: uid,
-    actionlist: [
-      {
-        action: "oa.open.inapp",
-        title: "Send interactive messages",
-        description: "This is a test for API send interactive messages",
-        thumb: "https://developers.zalo.me/web/static/prodution/images/bg.jpg",
-        href: "https://developers.zalo.me",
-        data: "https://developers.zalo.me",
-        popup: {
-          title: "Open Website Zalo For Developers",
-          desc: "Click ok to visit Zalo For Developers and read more Document",
-          ok: "ok",
-          cancel: "cancel"
-        }
-      }
-    ]
-  };
-  ZaloClient.api("sendmessage/actionlist", "POST", params, function(
-    response
-  ) {});
-};
+// sendInteractiveMessage = async uid => {
+//   var params = {
+//     uid: uid,
+//     actionlist: [
+//       {
+//         action: "oa.open.inapp",
+//         title: "Send interactive messages",
+//         description: "This is a test for API send interactive messages",
+//         thumb: "https://developers.zalo.me/web/static/prodution/images/bg.jpg",
+//         href: "https://developers.zalo.me",
+//         data: "https://developers.zalo.me",
+//         popup: {
+//           title: "Open Website Zalo For Developers",
+//           desc: "Click ok to visit Zalo For Developers and read more Document",
+//           ok: "ok",
+//           cancel: "cancel"
+//         }
+//       }
+//     ]
+//   };
+//   ZaloClient.api("sendmessage/actionlist", "POST", params, function(
+//     response
+//   ) {});
+// };
