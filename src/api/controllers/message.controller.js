@@ -82,6 +82,8 @@ exports.send = async (req, res) => {
               sendTextLink(uid, link, linktitle, linkdes, linkthumb);
               break;
           }
+
+          console.log({user_ids: uid, type, link, title: linktitle, description: linkdes, thumbnail: linkthumb})
         });
       } else {
         userIds.forEach(uid => {
@@ -93,13 +95,13 @@ exports.send = async (req, res) => {
               sendTextLink(uid, link, linktitle, linkdes, linkthumb);
               break;
           }
+
+          console.log({user_ids: uid, type, link, title: linktitle, description: linkdes, thumbnail: linkthumb})
         });
       }
     });
 
-    res.json({ status: "success", message: {
-      user_ids: uid, link, title: linktitle, description: linkdes, thumbnail: linkthumb
-    } });
+    res.json({ status: "success" });
   } catch (error) {
     res.json({ status: "failed", message: error.message });
   }
