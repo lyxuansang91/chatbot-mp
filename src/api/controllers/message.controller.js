@@ -52,7 +52,9 @@ exports.send = async (req, res) => {
           files.file.path,
           "./uploads/" + uploadedFileName,
           function(err) {
-            console.error(err.message);
+            if (err) {
+              console.error(err.message);
+            }
           }
         );
       }
