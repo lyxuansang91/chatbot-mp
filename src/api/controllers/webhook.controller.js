@@ -51,11 +51,11 @@ handleFollow = async (req, res) => {
     };
 
     const zaloProfile = await ZaloClient.api("getprofile", {
-      uid: fromuid
+      uid: data.fromuid
     });
     console.log("zaloProfile", zaloProfile);
 
-    const checkUser = await ZaloUser.findByZaloUserId(fromuid);
+    const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
 
     if (!checkUser) {
       const user = new ZaloUser(data);
