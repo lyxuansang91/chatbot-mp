@@ -29,7 +29,7 @@ exports.send = async (req, res) => {
   try {
     var form = new formidable.IncomingForm();
 
-    const files = req.fiels;
+    const files = req.files;
     const fields = req.fields;
 
     console.log("req.fields", req.fields);
