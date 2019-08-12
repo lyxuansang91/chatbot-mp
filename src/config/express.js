@@ -10,7 +10,7 @@ const routes = require('../api/routes/v1');
 const { logs } = require('./vars');
 const strategies = require('./passport');
 const error = require('../api/middlewares/error');
-const formidableMiddleware = require('express-formidable');
+const formidable = require("formidable");
 
 /**
 * Express instance
@@ -24,7 +24,6 @@ app.use(morgan(logs));
 // parse body params and attache them to req.body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(formidableMiddleware());
 
 // gzip compression
 app.use(compress());
@@ -49,6 +48,20 @@ passport.use('google', strategies.google);
 app.use('/v1', routes);
 
 app.use('/uploads', express.static('uploads'));
+
+app.use(function(req, res, next) {
+  var form = new formidable.IncomingForm({
+    encoding: "utf-8",
+    uploadDir: path.join(__dirname, "/Upload"),
+    multiples: true,
+    keepExtensions: true
+  });
+  form.once("error", console.log);
+  form.parse(req, function(err, fields, files) {
+    Object.assign(req, { fields, files });
+    next();
+  });
+});
 
 // if error is not an instanceOf APIError, convert it.
 app.use(error.converter);

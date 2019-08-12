@@ -46,7 +46,7 @@ router
    * @apiParam  {String}              [message]      Message content if user sends text message
    * @apiParam  {String}             [link]          Message's link
    * @apiParam  {String}             [description]          Message's description
-   * @apiParam  {String}             [thumbnail]          Message's thumbnail
+   * @apiParam  {File}             [thumbnail]          Message's thumbnail file path
    *
    * @apiSuccess (Created 201) {String=success,failed}  status         Response's status
    *
