@@ -10,6 +10,7 @@ const routes = require('../api/routes/v1');
 const { logs } = require('./vars');
 const strategies = require('./passport');
 const error = require('../api/middlewares/error');
+const formidableMiddleware = require('express-formidable');
 
 /**
 * Express instance
@@ -23,6 +24,7 @@ app.use(morgan(logs));
 // parse body params and attache them to req.body
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(formidableMiddleware());
 
 // gzip compression
 app.use(compress());

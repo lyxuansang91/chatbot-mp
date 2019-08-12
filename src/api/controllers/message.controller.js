@@ -29,6 +29,11 @@ exports.send = async (req, res) => {
   try {
     var form = new formidable.IncomingForm();
 
+    console.log("req.fields", req.fields);
+    console.log("========================")
+    console.log("req.files", req.files);
+    console.log("========================");
+
     // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
     form.parse(req, async function(err, fields, files) {
       if (err) {
