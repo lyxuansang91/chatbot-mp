@@ -43,7 +43,7 @@ handleFollow = async (req, res) => {
     const zaloProfile = await ZaloClient.api("getprofile", {
       uid: req.body.follower.id
     });
-    console.log("zaloProfile", zaloProfile);
+    console.log("zaloProfile", zaloProfile.data);
 
     const data = {
       fromuid: req.body.follower.id,
@@ -53,7 +53,7 @@ handleFollow = async (req, res) => {
       pageid: req.body.pageid,
       oaid: req.body.oa_id,
       status: "follow",
-      ...zaloProfile
+      ...zaloProfile.data
     };
 
     const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
