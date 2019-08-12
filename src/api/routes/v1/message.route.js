@@ -58,6 +58,7 @@ router
    * @apiPermission admin
    *
    * @apiHeader {String} Authorization   User's access token
+   * @apiHeader {String} Content-Type   multipart/form-data
    *
    * @apiParam  {Array}               [user_ids]     List of user ids to send message. Set null if you want to send to all users
    * @apiParam  {String=text,text_link}              [type]      Type of message

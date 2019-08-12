@@ -24,7 +24,7 @@ router
    * @apiParam  {String=follow,unfollow}             [status]      User's status
    *
    * @apiSuccess {String=follow,unfollow}  status         Response's status
-   * @apiSuccess {Object[]} data   List of Zalo messages.
+   * @apiSuccess {Object[]} data   List of Zalo conversations.
    *
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
