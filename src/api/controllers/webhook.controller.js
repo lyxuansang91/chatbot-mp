@@ -50,6 +50,9 @@ handleFollow = async (req, res) => {
       status: 'follow',
     };
 
+    const zaloProfile = await ZaloClient.api("getprofile", { uid: userId });
+    console.log("zaloProfile", zaloProfile);
+
     const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid);
 
     if (!checkUser) {
