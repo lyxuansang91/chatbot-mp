@@ -26,7 +26,7 @@ exports.getConversations = async (req, res) => {
       status
     });
     const transformedConversations = conversations.map(conversation =>
-      conversation
+      conversation.transform()
     );
 
     res.json({ status: "success", data: transformedConversations });

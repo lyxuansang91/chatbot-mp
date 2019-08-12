@@ -57,6 +57,29 @@ const zaloUserSchema = new mongoose.Schema(
   }
 );
 
+zaloUserSchema.method({
+  transform() {
+    const transformed = {};
+    const fields = [
+      "id",
+      "fromuid",
+      "displayName",
+      "birthDate",
+      "avatar",
+      "avatars",
+      "status",
+      "userGender",
+      "sharedInfo",
+      "tagsAndNotesInfo"
+    ];
+
+    fields.forEach(field => {
+      transformed[field] = this[field];
+    });
+
+    return transformed;
+  }
+});
 
 zaloUserSchema.statics = {
   /**
