@@ -79,18 +79,21 @@ zaloUserSchema.statics = {
     }
   },
 
-  list({
-    page = 1, perPage = 100,
-  }) {
-
+  list({ page = 1, perPage = 100, status }) {
+    if (status) {
+      return this.find({ status })
+        .sort({ createdAt: -1 })
+        .skip(perPage * (page - 1))
+        .limit(perPage)
+        .exec();
+    }
     return this.find()
       .sort({ createdAt: -1 })
       .skip(perPage * (page - 1))
       .limit(perPage)
       .exec();
-  },
-
-}
+  }
+};
 
 /**
  * @typedef ZaloUserSchema
