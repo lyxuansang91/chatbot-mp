@@ -20,12 +20,12 @@ exports.send = async (req, res) => {
   try {
     var form = new formidable.IncomingForm();
 
-    const thumbnail = req.thumbnail;
+    const thumbnail = req.file;
     const fields = req.body;
 
     console.log("req.fields", req.body);
     console.log("========================")
-    console.log("req.files", req.thumbnail);
+    console.log("req.files", req.file);
     console.log("========================");
 
     // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
@@ -33,7 +33,7 @@ exports.send = async (req, res) => {
     if (thumbnail) {
       // handle upload file
       const uploadedFileName =
-        shortid.generate() + path.parse(thumbnail.name).ext;
+        shortid.generate() + path.parse(thumbnail.originalname).ext;
       linkthumb =
         (process.env.NODE_ENV === "development"
           ? req.protocol + "://" + req.get("host")
@@ -114,6 +114,7 @@ exports.send = async (req, res) => {
 
     res.json({ status: "success" });
   } catch (error) {
+    console.log('error', error);
     res.json({ status: "failed", message: error.message });
   }
 };

@@ -1,17 +1,19 @@
 /*eslint-disable */
-const express = require('express');
-const controller = require('../../controllers/message.controller');
-const validate = require('express-validation');
-const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
+const express = require("express");
+const controller = require("../../controllers/message.controller");
+const validate = require("express-validation");
+const { authorize, ADMIN, LOGGED_USER } = require("../../middlewares/auth");
 
-const { getMessage } = require('../../validations/message.validation');
+const { getMessage } = require("../../validations/message.validation");
 
 const router = express.Router();
 
 const multer = require("multer");
+const shortid = require("shortid");
+const path = require("path");
 const upload = multer({
   storage: multer.diskStorage({
-    destination: "./uploads/",
+    destination: global.__basedir + "/uploads/",
     filename: function(req, file, cb) {
       // user shortid.generate() alone if no extension is needed
       cb(null, shortid.generate() + path.parse(file.originalname).ext);
@@ -71,6 +73,6 @@ router
    */
   .post("/", authorize(ADMIN), upload, controller.send);
 
-router.post('/media', authorize(ADMIN), controller.uploadMedia);
+router.post("/media", authorize(ADMIN), controller.uploadMedia);
 
 module.exports = router;
