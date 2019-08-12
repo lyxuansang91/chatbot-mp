@@ -29,83 +29,97 @@ exports.send = async (req, res) => {
   try {
     var form = new formidable.IncomingForm();
 
+    const files = req.fiels;
+    const fields = req.fields;
+
     console.log("req.fields", req.fields);
     console.log("========================")
     console.log("req.files", req.files);
     console.log("========================");
 
     // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
-    form.parse(req, async function(err, fields, files) {
-      if (err) {
-        // Check for and handle any errors here.
-        console.error(err.message);
-        return;
-      }
+    let linkthumb = null;
+    if (files.file) {
+      // handle upload file
+      const uploadedFileName =
+        shortid.generate() + path.parse(files.file.name).ext;
+      linkthumb =
+        (process.env.NODE_ENV === "development"
+          ? req.protocol + "://" + req.get("host")
+          : process.env.BASE_URL) +
+        "/uploads/" +
+        uploadedFileName;
 
-      let linkthumb = null
-      if (files.file) {
-        // handle upload file
-        const uploadedFileName = shortid.generate() + path.parse(files.file.name).ext
-        linkthumb =
-          (process.env.NODE_ENV === "development"
-            ? req.protocol + "://" + req.get("host")
-            : process.env.BASE_URL) +
-          "/uploads/" +
-          uploadedFileName;
+      fs.rename(files.file.path, "./uploads/" + uploadedFileName, function(
+        err
+      ) {
+        if (err) {
+          console.error(err.message);
+        }
+      });
+    }
 
-        fs.rename(
-          files.file.path,
-          "./uploads/" + uploadedFileName,
-          function(err) {
-            if (err) {
-              console.error(err.message);
-            }
-          }
+    const {
+      user_ids,
+      type,
+      link,
+      message,
+      title: linktitle,
+      description: linkdes
+    } = fields;
+
+    const userIds = _.uniq(JSON.parse(user_ids));
+
+    if (!userIds) {
+      const users = await ZaloUser.list({ page: 1, perPage: 100 });
+
+      users.forEach(user => {
+        const uid = user.fromuid;
+        switch (type) {
+          case "text":
+            sendTextMessage(uid, message);
+            break;
+          case "text_link":
+            sendTextLink(uid, link, linktitle, linkdes, linkthumb);
+            break;
+        }
+
+        console.log(
+          "Send message:",
+          JSON.stringify({
+            user_ids: uid,
+            type,
+            link,
+            title: linktitle,
+            description: linkdes,
+            thumbnail: linkthumb
+          })
         );
-      }
+      });
+    } else {
+      userIds.forEach(uid => {
+        switch (type) {
+          case "text":
+            sendTextMessage(uid, message);
+            break;
+          case "text_link":
+            sendTextLink(uid, link, linktitle, linkdes, linkthumb);
+            break;
+        }
 
-      const {
-        user_ids,
-        type,
-        link,
-        message,
-        title: linktitle,
-        description: linkdes
-      } = fields;
-
-      const userIds = _.uniq(JSON.parse(user_ids));
-
-      if (!userIds) {
-        const users = await ZaloUser.list({ page: 1, perPage: 100 });
-
-        users.forEach(user => {
-          const uid = user.fromuid;
-          switch (type) {
-            case "text":
-              sendTextMessage(uid, message);
-              break;
-            case "text_link":
-              sendTextLink(uid, link, linktitle, linkdes, linkthumb);
-              break;
-          }
-
-          console.log({user_ids: uid, type, link, title: linktitle, description: linkdes, thumbnail: linkthumb})
-        });
-      } else {
-        userIds.forEach(uid => {
-          switch (type) {
-            case "text":
-              sendTextMessage(uid, message);
-              break;
-            case "text_link":
-              sendTextLink(uid, link, linktitle, linkdes, linkthumb);
-              break;
-          }
-
-          console.log({user_ids: uid, type, link, title: linktitle, description: linkdes, thumbnail: linkthumb})
-        });
-      }
-    });
+        console.log(
+          "Send message:",
+          JSON.stringify({
+            user_ids: uid,
+            type,
+            link,
+            title: linktitle,
+            description: linkdes,
+            thumbnail: linkthumb
+          })
+        );
+      });
+    }
 
     res.json({ status: "success" });
   } catch (error) {
