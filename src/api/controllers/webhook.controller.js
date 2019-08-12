@@ -41,7 +41,7 @@ exports.create = async (req, res) => {
 handleFollow = async (req, res) => {
   try {
     const zaloProfile = await ZaloClient.api("getprofile", {
-      uid: data.fromuid
+      uid: req.body.follower.id
     });
     console.log("zaloProfile", zaloProfile);
 
