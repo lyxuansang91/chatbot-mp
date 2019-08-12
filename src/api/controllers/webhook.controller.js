@@ -40,6 +40,11 @@ exports.create = async (req, res) => {
 
 handleFollow = async (req, res) => {
   try {
+    const zaloProfile = await ZaloClient.api("getprofile", {
+      uid: data.fromuid
+    });
+    console.log("zaloProfile", zaloProfile);
+
     const data = {
       fromuid: req.body.follower.id,
       userIdByApp: req.body.user_id_by_app,
@@ -47,13 +52,9 @@ handleFollow = async (req, res) => {
       appid: req.body.app_id,
       pageid: req.body.pageid,
       oaid: req.body.oa_id,
-      status: 'follow',
+      status: "follow",
+      ...zaloProfile
     };
-
-    const zaloProfile = await ZaloClient.api("getprofile", {
-      uid: data.fromuid
-    });
-    console.log("zaloProfile", zaloProfile);
 
     const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
 

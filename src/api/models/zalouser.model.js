@@ -7,31 +7,55 @@ const mongoose = require('mongoose');
  * User Schema
  * @private
  */
-const zaloUserSchema = new mongoose.Schema({
-  fromuid: {
-    type: String
+const zaloUserSchema = new mongoose.Schema(
+  {
+    fromuid: {
+      type: String
+    },
+    phone: {
+      type: String
+    },
+    status: {
+      type: String
+    },
+    appid: {
+      type: String
+    },
+    pageid: {
+      type: String
+    },
+    oaid: {
+      type: String
+    },
+    mac: {
+      type: String
+    },
+    userGender: {
+      type: Number
+    },
+    displayName: {
+      type: String
+    },
+    birthDate: {
+      type: Number
+    },
+    sharedInfo: {
+      type: String
+    },
+    tagsAndNotesInfo: {
+      type: Object
+    },
+    avatar: {
+      type: String
+    },
+    avatars: {
+      type: Object
+    }
   },
-  phone: {
-    type: String,
-  },
-  status : {
-    type: String
-  },
-  appid: {
-    type: String,
-  },
-  pageid: {
-    type: String,
-  },
-  oaid: {
-    type: String,
-  },
-  mac: {
-    type: String,
-  },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true
+  }
+);
 
 
 zaloUserSchema.statics = {
