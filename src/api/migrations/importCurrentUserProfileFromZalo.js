@@ -31,12 +31,15 @@ const importCurrentUserProfileFromZalo = async () => {
       });
       console.log("zaloProfile", zaloProfile.data);
 
-      const zaloUser = new ZaloUser({
-        ...user,
-        ...zaloProfile.data
-      });
+      user.userGender = zaloProfile.data.userGender;
+      user.avatar = zaloProfile.data.avatar;
+      user.avatars = zaloProfile.data.avatars;
+      user.birthDate = zaloProfile.data.birthDate;
+      user.sharedInfo = zaloProfile.data.sharedInfo;
+      user.tagsAndNotesInfo = zaloProfile.data.tagsAndNotesInfo;
+      user.displayName = zaloProfile.data.displayName;
 
-      const updatedUser = await zaloUser.save();
+      const updatedUser = await user.save();
       if (updatedUser) {
         console.log("Successful to update user", updatedUser);
       } else {
