@@ -8,6 +8,17 @@ const { getMessage } = require('../../validations/message.validation');
 
 const router = express.Router();
 
+const multer = require("multer");
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: "./uploads/",
+    filename: function(req, file, cb) {
+      // user shortid.generate() alone if no extension is needed
+      cb(null, shortid.generate() + path.parse(file.originalname).ext);
+    }
+  })
+}).single("thumbnail");
+
 router
   /**
    * @api {get} v1/messages List Zalo messages
@@ -30,7 +41,12 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .get('/', authorize(ADMIN), validate(getMessage), controller.getMessageHistory)
+  .get(
+    "/",
+    authorize(ADMIN),
+    validate(getMessage),
+    controller.getMessageHistory
+  )
   /**
    * @api {post} v1/messages Send Zalo messages
    * @apiDescription Send Zalo message to users
@@ -53,7 +69,7 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .post('/', authorize(ADMIN), controller.send);
+  .post("/", authorize(ADMIN), upload, controller.send);
 
 router.post('/media', authorize(ADMIN), controller.uploadMedia);
 

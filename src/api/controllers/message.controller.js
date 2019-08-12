@@ -14,35 +14,26 @@ const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
 const Message = require("../models/message.model");
 
-const multer = require("multer");
-const upload = multer({
-  storage: multer.diskStorage({
-    destination: "./uploads/",
-    filename: function(req, file, cb) {
-      // user shortid.generate() alone if no extension is needed
-      cb(null, shortid.generate() + path.parse(file.originalname).ext);
-    }
-  })
-}).single("file");
+
 
 exports.send = async (req, res) => {
   try {
     var form = new formidable.IncomingForm();
 
-    const files = req.files;
-    const fields = req.fields;
+    const thumbnail = req.thumbnail;
+    const fields = req.body;
 
-    console.log("req.fields", req.fields);
+    console.log("req.fields", req.body);
     console.log("========================")
-    console.log("req.files", req.files);
+    console.log("req.files", req.thumbnail);
     console.log("========================");
 
     // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
     let linkthumb = null;
-    if (files.file) {
+    if (thumbnail) {
       // handle upload file
       const uploadedFileName =
-        shortid.generate() + path.parse(files.file.name).ext;
+        shortid.generate() + path.parse(thumbnail.name).ext;
       linkthumb =
         (process.env.NODE_ENV === "development"
           ? req.protocol + "://" + req.get("host")
@@ -50,7 +41,7 @@ exports.send = async (req, res) => {
         "/uploads/" +
         uploadedFileName;
 
-      fs.rename(files.file.path, "./uploads/" + uploadedFileName, function(
+      fs.rename(thumbnail.path, "./uploads/" + uploadedFileName, function(
         err
       ) {
         if (err) {
