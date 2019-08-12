@@ -131,11 +131,11 @@ exports.uploadMedia = async (req, res) => {
 
 exports.getMessageHistory = async (req, res) => {
   try {
-    let { page, limit: perPage, user_id: fromuid, status } = req.query;
+    let { page, limit: perPage, user_id: uid, status } = req.query;
     page = page ? Number(page) : 1;
     perPage = perPage ? Number(perPage) : 100;
 
-    const messages = await Message.list({ page, perPage, fromuid, status });
+    const messages = await Message.list({ page, perPage, uid, status });
     const transformedMessages = messages.map(message => message.transform());
 
     res.json({ status: "success", data: transformedMessages });

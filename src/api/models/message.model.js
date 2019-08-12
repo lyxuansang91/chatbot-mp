@@ -58,21 +58,21 @@ messageSchema.statics = {
   },
 
   list({
-    page = 1, perPage = 100, fromuid, status
+    page = 1, perPage = 100, uid, status
   }) {
-    if (fromuid) {
+    if (uid) {
       if (status) {
-        return this.find({fromuid, status})
-        .sort({ createdAt: -1 })
-        .skip(perPage * (page - 1))
-        .limit(perPage)
-        .exec();
+        return this.find({ uid, status })
+          .sort({ createdAt: -1 })
+          .skip(perPage * (page - 1))
+          .limit(perPage)
+          .exec();
       } else {
-        return this.find({fromuid})
-        .sort({ createdAt: -1 })
-        .skip(perPage * (page - 1))
-        .limit(perPage)
-        .exec();
+        return this.find({ uid })
+          .sort({ createdAt: -1 })
+          .skip(perPage * (page - 1))
+          .limit(perPage)
+          .exec();
       }
     }
 
