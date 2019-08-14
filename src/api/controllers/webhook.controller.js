@@ -40,6 +40,11 @@ exports.create = async (req, res) => {
 
 handleFollow = async (req, res) => {
   try {
+    const zaloProfile = await ZaloClient.api("getprofile", {
+      uid: req.body.follower.id
+    });
+    console.log("zaloProfile", zaloProfile.data);
+
     const data = {
       fromuid: req.body.follower.id,
       userIdByApp: req.body.user_id_by_app,
@@ -47,10 +52,11 @@ handleFollow = async (req, res) => {
       appid: req.body.app_id,
       pageid: req.body.pageid,
       oaid: req.body.oa_id,
-      status: 'follow',
+      status: "follow",
+      ...zaloProfile.data
     };
 
-    const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid);
+    const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
 
     if (!checkUser) {
       const user = new ZaloUser(data);
@@ -61,6 +67,7 @@ handleFollow = async (req, res) => {
     } else {
       if (checkUser.status !== 'follow') {
         checkUser.status = 'follow';
+        Object.assign(checkUser, zaloProfile.data);
         await checkUser.save();
       }
       res.json({
@@ -75,7 +82,7 @@ handleFollow = async (req, res) => {
 
 handleUnfollow = async (req, res) => {
   try {
-    const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid);
+    const checkUser = await ZaloUser.findByZaloUserId(req.body.follower.id);
 
     if (checkUser) {
       checkUser.status = 'unfollow';

@@ -1,12 +1,25 @@
 /*eslint-disable */
-const express = require('express');
-const controller = require('../../controllers/message.controller');
-const validate = require('express-validation');
-const { authorize, ADMIN, LOGGED_USER } = require('../../middlewares/auth');
+const express = require("express");
+const controller = require("../../controllers/message.controller");
+const validate = require("express-validation");
+const { authorize, ADMIN, LOGGED_USER } = require("../../middlewares/auth");
 
-const { getMessage } = require('../../validations/message.validation');
+const { getMessage } = require("../../validations/message.validation");
 
 const router = express.Router();
+
+const multer = require("multer");
+const shortid = require("shortid");
+const path = require("path");
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: global.__basedir + "/uploads/",
+    filename: function(req, file, cb) {
+      // user shortid.generate() alone if no extension is needed
+      cb(null, shortid.generate() + path.parse(file.originalname).ext);
+    }
+  })
+}).single("thumbnail");
 
 router
   /**
@@ -30,7 +43,12 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .get('/', authorize(ADMIN), validate(getMessage), controller.getMessageHistory)
+  .get(
+    "/",
+    authorize(ADMIN),
+    validate(getMessage),
+    controller.getMessageHistory
+  )
   /**
    * @api {post} v1/messages Send Zalo messages
    * @apiDescription Send Zalo message to users
@@ -40,21 +58,22 @@ router
    * @apiPermission admin
    *
    * @apiHeader {String} Authorization   User's access token
+   * @apiHeader {String} Content-Type   multipart/form-data
    *
    * @apiParam  {Array}               [user_ids]     List of user ids to send message. Set null if you want to send to all users
    * @apiParam  {String=text,text_link}              [type]      Type of message
    * @apiParam  {String}              [message]      Message content if user sends text message
    * @apiParam  {String}             [link]          Message's link
    * @apiParam  {String}             [description]          Message's description
-   * @apiParam  {String}             [thumbnail]          Message's thumbnail
+   * @apiParam  {File}             [thumbnail]          Message's thumbnail file path
    *
    * @apiSuccess (Created 201) {String=success,failed}  status         Response's status
    *
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .post('/', authorize(ADMIN), controller.send);
+  .post("/", authorize(ADMIN), upload, controller.send);
 
-router.post('/media', authorize(ADMIN), controller.uploadMedia);
+router.post("/media", authorize(ADMIN), controller.uploadMedia);
 
 module.exports = router;
