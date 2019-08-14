@@ -59,9 +59,9 @@ exports.send = async (req, res) => {
       description: linkdes
     } = fields;
 
-    const userIds = _.uniq(JSON.parse(user_ids));
+    const userIds = user_ids ? _.uniq(JSON.parse(user_ids)) : []
 
-    if (!userIds) {
+    if (userIds.length === 0) {
       const users = await ZaloUser.list({ page: 1, perPage: 100 });
 
       users.forEach(user => {
