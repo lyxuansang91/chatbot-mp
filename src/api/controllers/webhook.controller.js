@@ -82,7 +82,7 @@ handleFollow = async (req, res) => {
 
 handleUnfollow = async (req, res) => {
   try {
-    const checkUser = await ZaloUser.findByZaloUserId(req.body.fromuid);
+    const checkUser = await ZaloUser.findByZaloUserId(req.body.follower.id);
 
     if (checkUser) {
       checkUser.status = 'unfollow';
