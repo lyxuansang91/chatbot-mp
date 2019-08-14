@@ -13,7 +13,7 @@ const {
 const router = express.Router();
 
 router
-  .get('/', controller.get)
+  // .get('/', controller.get)
   .post('/', controller.get);
 
 module.exports = router;
