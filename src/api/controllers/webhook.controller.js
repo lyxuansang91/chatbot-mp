@@ -67,6 +67,7 @@ handleFollow = async (req, res) => {
     } else {
       if (checkUser.status !== 'follow') {
         checkUser.status = 'follow';
+        Object.assign(checkUser, zaloProfile.data);
         await checkUser.save();
       }
       res.json({
