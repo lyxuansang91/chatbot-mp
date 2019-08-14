@@ -37,4 +37,8 @@ router
   );
 
 
+router
+  .route("/:id")
+  .get(authorize(LOGGED_USER), controller.getConversationDetail);
+
 module.exports = router;

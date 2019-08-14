@@ -34,3 +34,20 @@ exports.getConversations = async (req, res) => {
     res.json({ status: "failed", message: error.message });
   }
 };
+
+exports.getConversationDetail = async (req, res) => {
+  try {
+    const conversation = await ZaloUser.findByZaloUserId(req.params.id);
+
+    if (conversation) {
+      const transformedConversation = conversation.transform();
+      res.json({ status: "success", data: transformedConversation });
+    } else {
+      res.json({ status: "success", data: null });
+    }
+
+  } catch (error) {
+    res.json({ status: "failed", message: error.message });
+  }
+
+}
