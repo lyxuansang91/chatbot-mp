@@ -72,7 +72,8 @@ router
    * @apiError (Unauthorized 401)  Unauthorized  Only authenticated users can access the data
    * @apiError (Forbidden 403)     Forbidden     Only admins can access the data
    */
-  .post("/", authorize(ADMIN), upload, controller.send);
+  .post("/", authorize(ADMIN), upload, controller.send)
+  .post("/:id", authorize(ADMIN), upload, controller.sendToUser);
 
 router.post("/media", authorize(ADMIN), controller.uploadMedia);
 
