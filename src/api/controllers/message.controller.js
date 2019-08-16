@@ -211,7 +211,7 @@ exports.uploadMedia = async (req, res) => {
 
 exports.getMessageHistory = async (req, res) => {
   try {
-    let { page, limit: perPage, user_id: uid, status } = req.query;
+    let { page, limit: perPage, userId: uid, status } = req.query;
     page = page ? Number(page) : 1;
     perPage = perPage ? Number(perPage) : 100;
 
