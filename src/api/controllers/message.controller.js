@@ -259,6 +259,7 @@ sendTextMessage = async (uid, message) => {
     uid,
     message
   });
+  console.log("ZaloResponse-sendTextMessage", response);
   if (response.data && response.data.msgId) {
     const zaloMessageId = response.data.msgId;
     const data = {
@@ -301,6 +302,7 @@ sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
     uid,
     ...message
   });
+  console.log("ZaloResponse-sendTextLink", response);
   if (response.data && response.data.msgId) {
     const zaloMessageId = response.data.msgId;
     const data = {
