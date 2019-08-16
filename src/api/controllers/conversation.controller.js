@@ -20,6 +20,8 @@ exports.getConversations = async (req, res) => {
     page = page ? Number(page) : 1;
     perPage = perPage ? Number(perPage) : 100;
 
+    const countConversations = await ZaloUser.countZaloUsers({ status })
+
     const conversations = await ZaloUser.list({
       page,
       perPage,
@@ -29,7 +31,12 @@ exports.getConversations = async (req, res) => {
       conversation.transform()
     );
 
-    res.json({ status: "success", data: transformedConversations });
+    res.json({
+      status: "success",
+      data: transformedConversations,
+      page: page,
+      totalPages: Math.ceil(countConversations / perPage)
+    });
   } catch (error) {
     res.json({ status: "failed", message: error.message });
   }

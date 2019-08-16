@@ -102,6 +102,14 @@ zaloUserSchema.statics = {
     }
   },
 
+  countZaloUsers({ status }) {
+    if (status) {
+      return this.count({ status })
+        .exec();
+    }
+    return this.count().exec();
+  },
+
   list({ page = 1, perPage = 100, status }) {
     if (status) {
       return this.find({ status })
