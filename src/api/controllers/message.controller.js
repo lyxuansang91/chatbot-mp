@@ -215,6 +215,10 @@ exports.getMessageHistory = async (req, res) => {
     page = page ? Number(page) : 1;
     perPage = perPage ? Number(perPage) : 100;
 
+    const messageCount = await Message.countMessages({ uid, status });
+
+    console.log("messageCount", messageCount);
+
     const messages = await Message.list({
       page,
       perPage,
@@ -225,7 +229,9 @@ exports.getMessageHistory = async (req, res) => {
 
     res.json({
       status: "success",
-      data: transformedMessages
+      data: transformedMessages,
+      page: page,
+      totalPages: Math.ceil(messageCount / perPage)
     });
   } catch (error) {
     res.json({

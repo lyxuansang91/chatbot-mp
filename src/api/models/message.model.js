@@ -57,6 +57,28 @@ messageSchema.statics = {
     await message.save()
   },
 
+  countMessages({
+    uid, status
+  }) {
+    if (uid) {
+      if (status) {
+        return this.count({ uid, status })
+          .exec();
+      } else {
+        return this.count({ uid })
+          .exec();
+      }
+    }
+
+    if (status) {
+      return this.count({ status })
+        .exec();
+    }
+
+    return this.count({})
+      .exec();
+  },
+
   list({
     page = 1, perPage = 100, uid, status
   }) {
