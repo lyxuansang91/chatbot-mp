@@ -68,7 +68,13 @@ exports.send = async (req, res) => {
             sentMessage = await sendTextMessage(uid, message);
             break;
           case "text_link":
-            sentMessage = await sendTextLink(uid, link, linktitle, linkdes, linkthumb);
+            sentMessage = await sendTextLink(
+              uid,
+              link,
+              linktitle,
+              linkdes,
+              linkthumb
+            );
             break;
         }
 
@@ -83,14 +89,17 @@ exports.send = async (req, res) => {
             sentMessage = await sendTextMessage(uid, message);
             break;
           case "text_link":
-            sentMessage = await sendTextLink(uid, link, linktitle, linkdes, linkthumb);
+            sentMessage = await sendTextLink(
+              uid,
+              link,
+              linktitle,
+              linkdes,
+              linkthumb
+            );
             break;
         }
 
-        console.log(
-          "Sent message:",
-          JSON.stringify(sentMessage)
-        );
+        console.log("Sent message:", JSON.stringify(sentMessage));
       });
     }
 
