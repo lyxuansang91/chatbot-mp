@@ -112,34 +112,6 @@ handleUserMessage = async (req, res) => {
   };
   const msg = new Message(customerMessage);
   await msg.save();
-
-  axios
-    .get('https://pixabay.com/api/', {
-      params: {
-        key: '12791370-e3ec2f19769e143cf190f1a8f',
-        image_type: 'photo',
-        lang: 'en',
-        q: message,
-      },
-    })
-    .then(response => {
-      const results = response.data;
-      if (results && results.hits && results.hits.length > 0) {
-        const pickedResult = results.hits[Math.floor(Math.random() * results.hits.length)];
-        sendTextLink(
-          userId,
-          pickedResult.pageURL,
-          pickedResult.user,
-          pickedResult.tags,
-          pickedResult.largeImageURL,
-        );
-      } else {
-        sendTextMessage(userId, 'Sorry, no result!!!');
-      }
-    })
-    .catch(e => {
-      console.log(e);
-    });
 };
 
 handleMessage = async req => {
