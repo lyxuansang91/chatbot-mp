@@ -50,12 +50,14 @@ exports.send = async (req, res) => {
         ACL: "public-read"
       };
 
-    const err = await s3.putObject(params);
-        if (err) {
-          linkthumb = null;
-        } else {
-          linkthumb = process.env.SPACES_BASE_URL + uploadedFileName;
-        }
+      const s3Res = await s3.putObject(params).promise();
+      if (s3Res && s3Res.ETag) {
+        linkthumb = process.env.SPACES_BASE_URL + uploadedFileName;
+      } else {
+        linkthumb = null; 
+      }
+
+      console.log("linkthumb", linkthumb);
       
     }
 
