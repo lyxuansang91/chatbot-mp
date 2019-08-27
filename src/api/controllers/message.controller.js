@@ -13,6 +13,18 @@ const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
 const Message = require("../models/message.model");
 
+
+const AWS = require("aws-sdk");
+
+// Configure client for use with Spaces
+const spacesEndpoint = new AWS.Endpoint(process.env.SPACES_ENDPOINT);
+const s3 = new AWS.S3({
+  endpoint: spacesEndpoint,
+  accessKeyId: process.env.SPACES_ACCESS_KEY_ID,
+  secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY
+});
+
+
 exports.send = async (req, res) => {
   try {
     const thumbnail = req.file;
@@ -29,18 +41,22 @@ exports.send = async (req, res) => {
       // handle upload file
       const uploadedFileName =
         shortid.generate() + path.parse(thumbnail.originalname).ext;
-      linkthumb =
-        (process.env.NODE_ENV === "development"
-          ? req.protocol + "://" + req.get("host")
-          : process.env.BASE_URL) +
-        "/uploads/" +
-        uploadedFileName;
+ 
+      // Add a file to a Space
+      var params = {
+        Body: fs.createReadStream(thumbnail.path),
+        Bucket: "gcapai",
+        Key: uploadedFileName,
+        ACL: "public-read"
+      };
 
-      fs.rename(thumbnail.path, "./uploads/" + uploadedFileName, function(err) {
+    const err = await s3.putObject(params);
         if (err) {
-          console.error(err.message);
+          linkthumb = null;
+        } else {
+          linkthumb = process.env.SPACES_BASE_URL + uploadedFileName;
         }
-      });
+      
     }
 
     const {

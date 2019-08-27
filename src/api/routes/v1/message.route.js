@@ -13,7 +13,6 @@ const shortid = require("shortid");
 const path = require("path");
 const upload = multer({
   storage: multer.diskStorage({
-    destination: global.__basedir + "/uploads/",
     filename: function(req, file, cb) {
       // user shortid.generate() alone if no extension is needed
       cb(null, shortid.generate() + path.parse(file.originalname).ext);
