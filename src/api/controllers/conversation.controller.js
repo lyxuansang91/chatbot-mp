@@ -1,18 +1,18 @@
 /*eslint-disable */
 
-const httpStatus = require("http-status");
-const { omit } = require("lodash");
-var request = require("request");
-const axios = require("axios");
-const shortid = require("shortid");
-const path = require("path");
-const formidable = require("formidable");
-const _ = require("lodash");
-const fs = require("fs");
+const httpStatus = require('http-status');
+const { omit } = require('lodash');
+var request = require('request');
+const axios = require('axios');
+const shortid = require('shortid');
+const path = require('path');
+const formidable = require('formidable');
+const _ = require('lodash');
+const fs = require('fs');
 
-const ZaloClient = require("../services/zaloService").ZaloClient;
-const ZaloUser = require("../models/zalouser.model");
-const Message = require("../models/message.model");
+const ZaloClient = require('../services/zaloService').ZaloClient;
+const ZaloUser = require('../models/zalouser.model');
+const Message = require('../models/message.model');
 
 exports.getConversations = async (req, res) => {
   try {
@@ -20,25 +20,23 @@ exports.getConversations = async (req, res) => {
     page = page ? Number(page) : 1;
     perPage = perPage ? Number(perPage) : 100;
 
-    const countConversations = await ZaloUser.countZaloUsers({ status })
+    const countConversations = await ZaloUser.countZaloUsers({ status });
 
     const conversations = await ZaloUser.list({
       page,
       perPage,
-      status
+      status,
     });
-    const transformedConversations = conversations.map(conversation =>
-      conversation.transform()
-    );
+    const transformedConversations = conversations.map(conversation => conversation.transform());
 
     res.json({
-      status: "success",
+      status: 'success',
       data: transformedConversations,
       page: page,
-      totalPages: Math.ceil(countConversations / perPage)
+      totalPages: Math.ceil(countConversations / perPage),
     });
   } catch (error) {
-    res.json({ status: "failed", message: error.message });
+    res.json({ status: 'failed', message: error.message });
   }
 };
 
@@ -48,13 +46,11 @@ exports.getConversationDetail = async (req, res) => {
 
     if (conversation) {
       const transformedConversation = conversation.transform();
-      res.json({ status: "success", data: transformedConversation });
+      res.json({ status: 'success', data: transformedConversation });
     } else {
-      res.json({ status: "success", data: null });
+      res.json({ status: 'success', data: null });
     }
-
   } catch (error) {
-    res.json({ status: "failed", message: error.message });
+    res.json({ status: 'failed', message: error.message });
   }
-
-}
+};
