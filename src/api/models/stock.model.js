@@ -75,6 +75,10 @@ stockSchema.statics = {
       .skip(perPage * (page - 1))
       .limit(perPage)
       .exec();
+  },
+
+  findStockByCode(code) {
+      return this.findOne({ code }).exec();
   }
 };
 

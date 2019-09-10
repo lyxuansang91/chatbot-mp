@@ -30,6 +30,16 @@ exports.create = async (req, res) => {
     const image = req.file;
     const fields = req.body;
 
+     let { code, type, data } = fields;
+
+     const checkStock = await Stock.findStockByCode(code)
+     if (checkStock) {
+        res.json({
+          status: "failed",
+          message: "Mã chứng khoán đã tồn tại"
+        });
+     }
+
     console.log("req.fields", req.body);
     console.log("========================");
     console.log("req.files", req.file);
@@ -60,20 +70,14 @@ exports.create = async (req, res) => {
       console.log("linkthumb", linkthumb);
     }
 
-    let {
-      code,
-      type, 
-      data
-    } = fields;
-
-    switch(type) {
-      case 'text':
-        data;
-        break;
-      case 'image':
-        data = linkthumb;
-        break;
-    }
+     switch (type) {
+       case "text":
+         data;
+         break;
+       case "image":
+         data = linkthumb;
+         break;
+     }
 
     let stock = new Stock({ code, type, data });
     const result = await stock.save();
