@@ -12,7 +12,7 @@ const fs = require("fs");
 const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
 const Message = require("../models/message.model");
-
+const PendingMessage = require("../models/pedingMessage.model");
 
 const AWS = require("aws-sdk");
 
@@ -23,7 +23,6 @@ const s3 = new AWS.S3({
   accessKeyId: process.env.SPACES_ACCESS_KEY_ID,
   secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY
 });
-
 
 exports.send = async (req, res) => {
   try {
@@ -41,7 +40,7 @@ exports.send = async (req, res) => {
       // handle upload file
       const uploadedFileName =
         shortid.generate() + path.parse(thumbnail.originalname).ext;
- 
+
       // Add a file to a Space
       var params = {
         Body: fs.createReadStream(thumbnail.path),
@@ -54,11 +53,10 @@ exports.send = async (req, res) => {
       if (s3Res && s3Res.ETag) {
         linkthumb = process.env.SPACES_BASE_URL + uploadedFileName;
       } else {
-        linkthumb = null; 
+        linkthumb = null;
       }
 
       console.log("linkthumb", linkthumb);
-      
     }
 
     const {
@@ -70,60 +68,39 @@ exports.send = async (req, res) => {
       description: linkdes
     } = fields;
 
-    const userIds = user_ids ? _.uniq(JSON.parse(user_ids)) : [];
+    const userIds = user_ids ? _.uniq(JSON.parse(user_ids)) : null;
 
-    if (userIds.length === 0) {
-      const users = await ZaloUser.list({
-        page: 1,
-        perPage: 100
-      });
-
-      users.forEach(async user => {
-        let sentMessage = null;
-        const uid = user.fromuid;
-        switch (type) {
-          case "text":
-            sentMessage = await sendTextMessage(uid, message);
-            break;
-          case "text_link":
-            sentMessage = await sendTextLink(
-              uid,
+    let messageObject = null;
+    switch (type) {
+      case "text":
+        messageObject = JSON.stringify(message);
+        break;
+      case "text_link":
+        messageObject = JSON.stringify({
+          links: [
+            {
               link,
               linktitle,
               linkdes,
               linkthumb
-            );
-            break;
-        }
-
-        console.log("Sent message:", JSON.stringify(sentMessage));
-      });
-    } else {
-      userIds.forEach(async uid => {
-        let sentMessage = null;
-
-        switch (type) {
-          case "text":
-            sentMessage = await sendTextMessage(uid, message);
-            break;
-          case "text_link":
-            sentMessage = await sendTextLink(
-              uid,
-              link,
-              linktitle,
-              linkdes,
-              linkthumb
-            );
-            break;
-        }
-
-        console.log("Sent message:", JSON.stringify(sentMessage));
-      });
+            }
+          ]
+        });
     }
 
-    res.json({
-      status: "success"
-    });
+    const result = await savePendingMessage(userIds, type, messageObject);
+
+    if (result) {
+      res.json({
+        status: "success",
+        message: result.transform()
+      });
+    } else {
+      res.json({
+        status: "failed",
+        message: "Không thể khởi tạo tin nhắn"
+      });
+    }
   } catch (error) {
     console.log("error", error);
     res.json({
@@ -202,7 +179,6 @@ exports.sendToUser = async (req, res) => {
         message: "Không thể gửi tin nhắn!"
       });
     }
-
   } catch (error) {
     console.log("error", error);
     res.json({
@@ -251,6 +227,109 @@ exports.getMessageHistory = async (req, res) => {
       page: page,
       totalPages: Math.ceil(messageCount / perPage)
     });
+  } catch (error) {
+    res.json({
+      status: "failed",
+      message: error.message
+    });
+  }
+};
+
+exports.getListPendingMessages = async (req, res) => {
+  try {
+    let { page, limit: perPage, status } = req.query;
+    page = page ? Number(page) : 1;
+    perPage = perPage ? Number(perPage) : 100;
+
+    const messageCount = await PendingMessage.countMessages({ status });
+
+    console.log("messageCount", messageCount);
+
+    const messages = await PendingMessage.list({
+      page,
+      perPage,
+      status
+    });
+    const transformedMessages = messages.map(message => message.transform());
+
+    res.json({
+      status: "success",
+      data: transformedMessages,
+      page: page,
+      totalPages: Math.ceil(messageCount / perPage)
+    });
+  } catch (error) {
+    res.json({
+      status: "failed",
+      message: error.message
+    });
+  }
+};
+
+exports.approve = async (req, res) => {
+  try {
+    const messageId = req.params.id;
+
+    const pendingMessage = await PendingMessage.findById(messageId);
+
+    if (pendingMessage) {
+      const userIds = pendingMessage.recipients ? JSON.parse(
+        pendingMessage.recipients
+      ) : null;
+      const messageType = pendingMessage.messageType;
+      const message = pendingMessage.message
+        ? JSON.parse(pendingMessage.message)
+        : null;
+
+      if (!userIds) {
+        const users = await ZaloUser.list({
+          page: 1,
+          perPage: 1000
+        });
+
+        users.forEach(async user => {
+          let sentMessage = null;
+          const uid = user.fromuid;
+          switch (messageType) {
+            case "text":
+              sentMessage = await sendTextMessage(uid, message);
+              break;
+            case "text_link":
+              sentMessage = await sendTextLinkWrapper(uid, message);
+              break;
+          }
+          console.log("Sent message:", JSON.stringify(sentMessage));
+        });
+      } else {
+        userIds.forEach(async uid => {
+          let sentMessage = null;
+
+          switch (messageType) {
+            case "text":
+              sentMessage = await sendTextLinkWrapper(uid, message);
+              break;
+            case "text_link":
+              sentMessage = await sendTextLink(uid, message);
+              break;
+          }
+          console.log("Sent message:", JSON.stringify(sentMessage));
+        });
+      }
+
+      pendingMessage.status = 'approved'
+      const result = await pendingMessage.save()
+
+      if (result)
+        res.json({
+          status: "success"
+        });
+
+    } else {
+      res.json({
+        status: "failed",
+        message: "Không tìm thấy tin nhắn"
+      });
+    }
   } catch (error) {
     res.json({
       status: "failed",
@@ -347,27 +426,40 @@ sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
   }
 };
 
-// sendInteractiveMessage = async uid => {
-//   var params = {
-//     uid: uid,
-//     actionlist: [
-//       {
-//         action: "oa.open.inapp",
-//         title: "Send interactive messages",
-//         description: "This is a test for API send interactive messages",
-//         thumb: "https://developers.zalo.me/web/static/prodution/images/bg.jpg",
-//         href: "https://developers.zalo.me",
-//         data: "https://developers.zalo.me",
-//         popup: {
-//           title: "Open Website Zalo For Developers",
-//           desc: "Click ok to visit Zalo For Developers and read more Document",
-//           ok: "ok",
-//           cancel: "cancel"
-//         }
-//       }
-//     ]
-//   };
-//   ZaloClient.api("sendmessage/actionlist", "POST", params, function(
-//     response
-//   ) {});
-// };
+sendTextLinkWrapper = async (uid, message) => {
+  const response = await ZaloClient.api("sendmessage/links", "POST", {
+    uid,
+    ...message
+  });
+  console.log("ZaloResponse-sendTextLinkWrapper", response);
+  if (response.data && response.data.msgId) {
+    const zaloMessageId = response.data.msgId;
+    const data = {
+      zaloMessageId,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: response.errorMsg === "Success" ? "success" : "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  } else {
+    const data = {
+      zaloMessageId: null,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  }
+};
+
+savePendingMessage = (recipients, messageType, message, status = "pending") => {
+  const data = { recipients, messageType, message, status };
+  const pendingMessage = new PendingMessage(data);
+  return pendingMessage.save();
+};

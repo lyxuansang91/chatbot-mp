@@ -46,7 +46,7 @@ router
     "/",
     authorize(ADMIN),
     validate(getMessage),
-    controller.getMessageHistory
+    controller.getListPendingMessages
   )
   /**
    * @api {post} v1/messages Send Zalo messages
@@ -73,7 +73,16 @@ router
    */
   .post("/", authorize(ADMIN), upload, controller.send);
 
+router.get(
+  "/history",
+  authorize(ADMIN),
+  validate(getMessage),
+  controller.getMessageHistory
+);
+
 router.route("/:id").post(authorize(ADMIN), upload, controller.sendToUser);
+
+router.route("/:id/approve").post(authorize(ADMIN), controller.approve);
 
 router.post("/media", authorize(ADMIN), controller.uploadMedia);
 
