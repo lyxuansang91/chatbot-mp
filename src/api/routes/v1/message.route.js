@@ -4,7 +4,10 @@ const controller = require("../../controllers/message.controller");
 const validate = require("express-validation");
 const { authorize, ADMIN, LOGGED_USER } = require("../../middlewares/auth");
 
-const { getMessage } = require("../../validations/message.validation");
+const {
+  getMessage,
+  getPendingMessage
+} = require("../../validations/message.validation");
 
 const router = express.Router();
 
@@ -45,7 +48,7 @@ router
   .get(
     "/",
     authorize(ADMIN),
-    validate(getMessage),
+    validate(getPendingMessage),
     controller.getListPendingMessages
   )
   /**

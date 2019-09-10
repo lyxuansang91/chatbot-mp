@@ -7,4 +7,9 @@ module.exports = {
       status: Joi.any().valid(['success', 'failed']),
     },
   },
+  getPendingMessage: {
+    query: {
+      status: Joi.any().valid(['pending', 'approved']),
+    },
+  },
 };
