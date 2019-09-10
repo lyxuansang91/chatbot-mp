@@ -153,3 +153,84 @@ exports.delete = async (req, res) => {
       message: "Xoá mã chứng khoán thành công"
     });
 }
+
+exports.update = async (req, res) => {
+  try {
+    const image = req.file;
+    const fields = req.body;
+
+    const stockId = req.params.id;
+
+    let { code, type, data } = fields;
+
+    const checkStock = await Stock.findById(stockId);
+    if (!checkStock) {
+      res.json({
+        status: "failed",
+        message: "Mã chứng khoán không tồn tại"
+      });
+    }
+
+    console.log("req.fields", req.body);
+    console.log("========================");
+    console.log("req.files", req.file);
+    console.log("========================");
+
+    // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
+    let linkthumb = null;
+    if (image) {
+      // handle upload file
+      const uploadedFileName =
+        shortid.generate() + path.parse(image.originalname).ext;
+
+      // Add a file to a Space
+      var params = {
+        Body: fs.createReadStream(image.path),
+        Bucket: "gcapai",
+        Key: uploadedFileName,
+        ACL: "public-read"
+      };
+
+      const s3Res = await s3.putObject(params).promise();
+      if (s3Res && s3Res.ETag) {
+        linkthumb = process.env.SPACES_BASE_URL + uploadedFileName;
+      } else {
+        linkthumb = null;
+      }
+
+      console.log("linkthumb", linkthumb);
+    }
+
+    switch (type) {
+      case "text":
+        data;
+        break;
+      case "image":
+        data = linkthumb;
+        break;
+    }
+
+    checkStock.code = code;
+    checkStock.type = type;
+    checkStock.data = data;
+    const result = await checkStock.save();
+
+    if (result) {
+      res.json({
+        status: "success",
+        message: result.transform()
+      });
+    } else {
+      res.json({
+        status: "failed",
+        message: "Cập nhật tạo mã chứng khoán không thành công"
+      });
+    }
+  } catch (error) {
+    console.log("error", error);
+    res.json({
+      status: "failed",
+      message: error.message
+    });
+  }
+};
