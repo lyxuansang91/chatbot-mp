@@ -24,7 +24,8 @@ const upload = multer({
 
 router
   .get("/", authorize(ADMIN), validate(getStock), controller.list)
-  .post("/", authorize(ADMIN), upload, controller.create);
+  .post("/", authorize(ADMIN), upload, controller.create)
+  .delete("/:id", authorize(ADMIN), controller.delete)
 
 
 // router.route("/:id").post(authorize(ADMIN), upload, controller.sendToUser);

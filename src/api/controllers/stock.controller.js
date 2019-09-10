@@ -132,3 +132,24 @@ exports.list = async (req, res) => {
     });
   }
 };
+
+
+exports.delete = async (req, res) => {
+    const stockId = req.params.id;
+
+    const checkStock = await Stock.findById(stockId);
+    if (!checkStock) {
+      res.json({
+        status: "failed",
+        message: "Mã chứng khoán không tồn tại"
+      });
+    }
+
+    const result = await checkStock.delete();
+    console.log('result', result);
+
+    res.json({
+      status: "success",
+      message: "Xoá mã chứng khoán thành công"
+    });
+}
