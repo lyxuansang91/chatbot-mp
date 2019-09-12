@@ -12,7 +12,6 @@ const Message = require('../models/message.model');
 
 exports.get = async (req, res) => {
   try {
-    console.log('zalo request', JSON.stringify(req.body))
     const event = req.body.event_name;
 
     switch (event) {
@@ -40,10 +39,10 @@ exports.create = async (req, res) => {
 
 handleFollow = async (req, res) => {
   try {
-    const zaloProfile = await ZaloClient.api("getprofile", {
-      uid: req.body.follower.id
+    const zaloProfile = await ZaloClient.api('getprofile', {
+      uid: req.body.follower.id,
     });
-    console.log("zaloProfile", zaloProfile.data);
+    console.log('zaloProfile', zaloProfile.data);
 
     const data = {
       fromuid: req.body.follower.id,
@@ -52,8 +51,8 @@ handleFollow = async (req, res) => {
       appid: req.body.app_id,
       pageid: req.body.pageid,
       oaid: req.body.oa_id,
-      status: "follow",
-      ...zaloProfile.data
+      status: 'follow',
+      ...zaloProfile.data,
     };
 
     const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
