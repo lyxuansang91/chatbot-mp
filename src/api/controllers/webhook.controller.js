@@ -1,27 +1,29 @@
 /*eslint-disable */
 
-const httpStatus = require('http-status');
-const { omit } = require('lodash');
-var ZaloOA = require('zalo-sdk').ZaloOA;
-var request = require('request');
-const axios = require('axios');
+const httpStatus = require("http-status");
+const { omit } = require("lodash");
+var ZaloOA = require("zalo-sdk").ZaloOA;
+var request = require("request");
+const axios = require("axios");
 
-const ZaloClient = require('../services/zaloService').ZaloClient;
-const ZaloUser = require('../models/zalouser.model');
-const Message = require('../models/message.model');
+const ZaloClient = require("../services/zaloService").ZaloClient;
+const ZaloUser = require("../models/zalouser.model");
+const Message = require("../models/message.model");
+
+const { getInformation } = require("../services/vietStockService");
 
 exports.get = async (req, res) => {
   try {
     const event = req.body.event_name;
 
     switch (event) {
-      case 'follow':
+      case "follow":
         await handleFollow(req, res);
         break;
-      case 'unfollow':
+      case "unfollow":
         await handleUnfollow(req, res);
         break;
-      case 'user_send_text':
+      case "user_send_text":
         await handleUserMessage(req, res);
         break;
     }
@@ -39,10 +41,10 @@ exports.create = async (req, res) => {
 
 handleFollow = async (req, res) => {
   try {
-    const zaloProfile = await ZaloClient.api('getprofile', {
-      uid: req.body.follower.id,
+    const zaloProfile = await ZaloClient.api("getprofile", {
+      uid: req.body.follower.id
     });
-    console.log('zaloProfile', zaloProfile.data);
+    console.log("zaloProfile", zaloProfile.data);
 
     const data = {
       fromuid: req.body.follower.id,
@@ -51,8 +53,8 @@ handleFollow = async (req, res) => {
       appid: req.body.app_id,
       pageid: req.body.pageid,
       oaid: req.body.oa_id,
-      status: 'follow',
-      ...zaloProfile.data,
+      status: "follow",
+      ...zaloProfile.data
     };
 
     const checkUser = await ZaloUser.findByZaloUserId(data.fromuid);
@@ -61,16 +63,16 @@ handleFollow = async (req, res) => {
       const user = new ZaloUser(data);
       const savedZaloUser = await user.save();
       res.json({
-        status: 'created',
+        status: "created"
       });
     } else {
-      if (checkUser.status !== 'follow') {
-        checkUser.status = 'follow';
+      if (checkUser.status !== "follow") {
+        checkUser.status = "follow";
         Object.assign(checkUser, zaloProfile.data);
         await checkUser.save();
       }
       res.json({
-        status: 'updated',
+        status: "updated"
       });
     }
   } catch (error) {
@@ -84,10 +86,10 @@ handleUnfollow = async (req, res) => {
     const checkUser = await ZaloUser.findByZaloUserId(req.body.follower.id);
 
     if (checkUser) {
-      checkUser.status = 'unfollow';
+      checkUser.status = "unfollow";
       await checkUser.save();
       res.json({
-        status: 'updated',
+        status: "updated"
       });
     }
   } catch (error) {
@@ -102,15 +104,23 @@ handleUserMessage = async (req, res) => {
   const messageId = data.message.msg_id;
   const userId = data.sender.id;
 
-  const customerMessage = {
-    zaloMessageId: messageId,
-    uid: userId,
-    messageType: 'customer_message',
-    message,
-    status: 'success',
-  };
-  const msg = new Message(customerMessage);
-  await msg.save();
+  const query = analyzeQuery(message);
+
+  console.log("analyzeQuery", query);
+
+  switch (query.type) {
+    case "COBAN":
+      break;
+    case "TINTUC":
+      processTinTuc(userId, query.message);
+      break;
+    case "THONGTIN":
+      break;
+    case "EXPERT":
+      break;
+    default:
+      break;
+  }
 };
 
 handleMessage = async req => {
@@ -119,79 +129,163 @@ handleMessage = async req => {
   var message = data.message;
   var userId = data.fromuid;
   console.log(data);
-  console.log('User', userId, 'had send a message.', message);
+  console.log("User", userId, "had send a message.", message);
 
   if (userId && message) {
-    ZaloClient.api('getprofile', { uid: userId }, function(response) {
-      console.log('profile', response.data);
+    ZaloClient.api("getprofile", { uid: userId }, function(response) {
+      console.log("profile", response.data);
       var profile = response.data;
-      var returnMessage = 'Chào ' + 'Son' + '. Bạn vừa nói: ' + message;
-      ZaloClient.api('sendmessage/text', 'POST', { uid: userId, message: returnMessage }, function(
-        profileResponse,
-      ) {
-        console.log('profileResponse', profileResponse);
-      });
+      var returnMessage = "Chào " + "Son" + ". Bạn vừa nói: " + message;
+      ZaloClient.api(
+        "sendmessage/text",
+        "POST",
+        { uid: userId, message: returnMessage },
+        function(profileResponse) {
+          console.log("profileResponse", profileResponse);
+        }
+      );
     });
   }
 };
 
 sendTextMessage = async (uid, message) => {
-  ZaloClient.api('sendmessage/text', 'POST', { uid, message }, function(response) {
-    if (response.data && response.data.msgId) {
-      const zaloMessageId = response.data.msgId;
-      const data = {
-        zaloMessageId,
-        uid,
-        messageType: 'text',
-        message,
-        status: response.errorMsg === 'Success' ? 'success' : 'failed',
-      };
-    } else {
-      const data = {
-        zaloMessageId: null,
-        uid,
-        messageType: 'text',
-        message,
-        status: 'failed',
-      };
-    }
+  const response = await ZaloClient.api("sendmessage/text", "POST", {
+    uid,
+    message
   });
+  console.log("ZaloResponse-sendTextMessage", response);
+  if (response.data && response.data.msgId) {
+    const zaloMessageId = response.data.msgId;
+    const data = {
+      zaloMessageId,
+      uid,
+      messageType: "text",
+      message,
+      status: response.errorMsg === "Success" ? "success" : "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  } else {
+    const data = {
+      zaloMessageId: null,
+      uid,
+      messageType: "text",
+      message,
+      status: "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  }
 };
 
 sendTextLink = async (uid, link, linktitle, linkdes, linkthumb) => {
   var message = {
-    uid,
     links: [
       {
         link,
         linktitle,
         linkdes,
-        linkthumb,
-      },
-    ],
+        linkthumb
+      }
+    ]
   };
-  ZaloClient.api('sendmessage/links', 'POST', { ...message }, function(response) {
-    if (response.data && response.data.msgId) {
-      const zaloMessageId = response.data.msgId;
-      const data = {
-        zaloMessageId,
-        uid,
-        messageType: 'text_link',
-        message: JSON.stringify(message),
-        status: response.errorMsg === 'Success' ? 'success' : 'failed',
-      };
-      const msg = new Message(data);
-      msg.save();
-    } else {
-      const data = {
-        zaloMessageId: null,
-        uid,
-        messageType: 'text_link',
-        message: JSON.stringify(message),
-        status: 'failed',
-      };
-      const msg = new Message(data);
-      msg.save();
-    }
+
+  const response = await ZaloClient.api("sendmessage/links", "POST", {
+    uid,
+    ...message
   });
+  console.log("ZaloResponse-sendTextLink", response);
+  if (response.data && response.data.msgId) {
+    const zaloMessageId = response.data.msgId;
+    const data = {
+      zaloMessageId,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: response.errorMsg === "Success" ? "success" : "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  } else {
+    const data = {
+      zaloMessageId: null,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  }
+};
+
+sendMultipleTextLink = async (uid, links) => {
+  var message = {
+    links
+  };
+
+  console.log("message", message);
+
+  const response = await ZaloClient.api("sendmessage/links", "POST", {
+    uid,
+    ...message
+  });
+  console.log("ZaloResponse-sendTextLink", response);
+  if (response.data && response.data.msgId) {
+    const zaloMessageId = response.data.msgId;
+    const data = {
+      zaloMessageId,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: response.errorMsg === "Success" ? "success" : "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  } else {
+    const data = {
+      zaloMessageId: null,
+      uid,
+      messageType: "text_link",
+      message: JSON.stringify(message),
+      status: "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  }
+};
+
+analyzeQuery = message => {
+  const parts = message.split(" ");
+  if (parts.length < 1) {
+    return {
+      type: "EXPERT",
+      message
+    };
+  }
+  return {
+    type: parts[0],
+    message: parts[1]
+  };
+};
+
+processTinTuc = async (userId, keyword) => {
+  console.log("queryTinTuc", keyword);
+  const result = await getInformation(keyword);
+  if (result) {
+    console.log("result", result);
+    const links = result.data;
+
+    if (links && links.length > 0) {
+      sendMultipleTextLink(userId, links);
+    } else {
+      sendTextMessage(userId, "Không có tin tức mới cho mã cổ phiếu này :)");
+    }
+  }
 };
