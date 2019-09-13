@@ -81,16 +81,18 @@ exports.create = async (req, res) => {
       }
     }
 
+    let attachmentId = null;
     switch (type) {
       case "text":
         data;
         break;
       case "image":
-        data = zaloImageId;
+        data = linkthumb;
+        attachmentId = zaloImageId;
         break;
     }
 
-    let stock = new Stock({ code, type, data });
+    let stock = new Stock({ code, type, data, attachmentId });
     const result = await stock.save();
 
     if (result) {
@@ -209,20 +211,31 @@ exports.update = async (req, res) => {
       }
 
       console.log("linkthumb", linkthumb);
+
+      const response = await uploadImageToZalo(fs.createReadStream(image.path));
+      console.log("uploadImageToZalo", response.data);
+      console.log("linkthumb", linkthumb);
+
+      if (response.data && response.data.message === "Success") {
+        zaloImageId = response.data.data.attachment_id;
+      }
     }
 
+    let attachmentId = null;
     switch (type) {
       case "text":
         data;
         break;
       case "image":
         data = linkthumb;
+        attachmentId = zaloImageId;
         break;
     }
 
-    checkStock.code = code;
-    checkStock.type = type;
-    checkStock.data = data;
+    checkStock.code = code || checkStock.code;
+    checkStock.type = type || checkStock.type;
+    checkStock.data = data || checkStock.data;
+    checkStock.attachmentId = attachmentId || checkStock.attachmentId;
     const result = await checkStock.save();
 
     if (result) {

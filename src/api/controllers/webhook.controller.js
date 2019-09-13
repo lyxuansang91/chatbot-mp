@@ -335,7 +335,7 @@ processCoBan = async (userId, keyword) => {
     if (data.type === 'text') {
       sendTextMessage(userId, data.data);
     } else if (data.type === 'image') {
-      sendImage(userId, '', data.data);
+      sendImage(userId, "", data.attachmentId);
     }
   }
 }

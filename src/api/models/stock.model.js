@@ -28,6 +28,9 @@ const stockSchema = new mongoose.Schema(
     data: {
       type: String
     },
+    attachmentId: {
+      type: String
+    },
     status: {
       type: String,
       enum: StockStatuses,
@@ -42,7 +45,7 @@ const stockSchema = new mongoose.Schema(
 stockSchema.method({
   transform() {
     const transformed = {};
-    const fields = ["id", "code", "type", "data", "status"];
+    const fields = ["id", "code", "type", "data", "attachmentId", "status"];
 
     fields.forEach(field => {
       transformed[field] = this[field];
