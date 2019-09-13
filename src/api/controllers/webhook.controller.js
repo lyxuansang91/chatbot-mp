@@ -9,6 +9,7 @@ const axios = require("axios");
 const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
 const Message = require("../models/message.model");
+const Stock = require("../models/stock.model");
 
 const { getInformation } = require("../services/vietStockService");
 
@@ -110,6 +111,7 @@ handleUserMessage = async (req, res) => {
 
   switch (query.type) {
     case "COBAN":
+      processCoBan(userId, query.message);
       break;
     case "TINTUC":
       processTinTuc(userId, query.message);
@@ -261,6 +263,40 @@ sendMultipleTextLink = async (uid, links) => {
   }
 };
 
+sendImage = async (uid, message, imageid) => {
+  const response = await ZaloClient.api("sendmessage/image", "POST", {
+    uid,
+    message,
+    imageid
+  });
+  console.log("ZaloResponse-sendTextMessage", response);
+  if (response.data && response.data.msgId) {
+    const zaloMessageId = response.data.msgId;
+    const data = {
+      zaloMessageId,
+      uid,
+      messageType: "text",
+      message,
+      status: response.errorMsg === "Success" ? "success" : "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  } else {
+    const data = {
+      zaloMessageId: null,
+      uid,
+      messageType: "text",
+      message,
+      status: "failed"
+    };
+    const msg = new Message(data);
+    await msg.save();
+    return msg;
+  }
+};
+
+
 analyzeQuery = message => {
   const parts = message.split(" ");
   if (parts.length < 1) {
@@ -276,7 +312,7 @@ analyzeQuery = message => {
 };
 
 processTinTuc = async (userId, keyword) => {
-  console.log("queryTinTuc", keyword);
+  console.log("processTinTuc", keyword);
   const result = await getInformation(keyword);
   if (result) {
     console.log("result", result);
@@ -289,3 +325,17 @@ processTinTuc = async (userId, keyword) => {
     }
   }
 };
+
+processCoBan = async (userId, keyword) => {
+  console.log("processCoBan", keyword);
+  const result = await Stock.findStockByCode(keyword);
+  if (result) {
+    console.log("result", result);
+    const data = result;
+    if (data.type === 'text') {
+      sendTextMessage(userId, data.data);
+    } else if (data.type === 'image') {
+      sendImage(userId, '', data.data);
+    }
+  }
+}

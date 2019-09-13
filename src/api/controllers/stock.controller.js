@@ -8,6 +8,8 @@ const path = require("path");
 const formidable = require("formidable");
 const _ = require("lodash");
 const fs = require("fs");
+var FormData = require("form-data");
+
 
 const ZaloClient = require("../services/zaloService").ZaloClient;
 const ZaloUser = require("../models/zalouser.model");
@@ -25,20 +27,22 @@ const s3 = new AWS.S3({
   secretAccessKey: process.env.SPACES_SECRET_ACCESS_KEY
 });
 
+const zaloAccessToken = process.env.ZALO_ACCESS_TOKEN;
+
 exports.create = async (req, res) => {
   try {
     const image = req.file;
     const fields = req.body;
 
-     let { code, type, data } = fields;
+    let { code, type, data } = fields;
 
-     const checkStock = await Stock.findStockByCode(code)
-     if (checkStock) {
-        res.json({
-          status: "failed",
-          message: "Mã chứng khoán đã tồn tại"
-        });
-     }
+    const checkStock = await Stock.findStockByCode(code);
+    if (checkStock) {
+      res.json({
+        status: "failed",
+        message: "Mã chứng khoán đã tồn tại"
+      });
+    }
 
     console.log("req.fields", req.body);
     console.log("========================");
@@ -47,6 +51,7 @@ exports.create = async (req, res) => {
 
     // form.parse analyzes the incoming stream data, picking apart the different fields and files for you.
     let linkthumb = null;
+    let zaloImageId = null;
     if (image) {
       // handle upload file
       const uploadedFileName =
@@ -67,17 +72,23 @@ exports.create = async (req, res) => {
         linkthumb = null;
       }
 
+      const response = await uploadImageToZalo(fs.createReadStream(image.path));
+      console.log("uploadImageToZalo", response.data);
       console.log("linkthumb", linkthumb);
+
+      if (response.data && response.data.message === 'Success') {
+        zaloImageId = response.data.data.attachment_id;
+      }
     }
 
-     switch (type) {
-       case "text":
-         data;
-         break;
-       case "image":
-         data = linkthumb;
-         break;
-     }
+    switch (type) {
+      case "text":
+        data;
+        break;
+      case "image":
+        data = zaloImageId;
+        break;
+    }
 
     let stock = new Stock({ code, type, data });
     const result = await stock.save();
@@ -133,26 +144,25 @@ exports.list = async (req, res) => {
   }
 };
 
-
 exports.delete = async (req, res) => {
-    const stockId = req.params.id;
+  const stockId = req.params.id;
 
-    const checkStock = await Stock.findById(stockId);
-    if (!checkStock) {
-      res.json({
-        status: "failed",
-        message: "Mã chứng khoán không tồn tại"
-      });
-    }
-
-    const result = await checkStock.delete();
-    console.log('result', result);
-
+  const checkStock = await Stock.findById(stockId);
+  if (!checkStock) {
     res.json({
-      status: "success",
-      message: "Xoá mã chứng khoán thành công"
+      status: "failed",
+      message: "Mã chứng khoán không tồn tại"
     });
-}
+  }
+
+  const result = await checkStock.delete();
+  console.log("result", result);
+
+  res.json({
+    status: "success",
+    message: "Xoá mã chứng khoán thành công"
+  });
+};
 
 exports.update = async (req, res) => {
   try {
@@ -233,4 +243,17 @@ exports.update = async (req, res) => {
       message: error.message
     });
   }
+};
+
+
+uploadImageToZalo = async file => {
+  let formData = new FormData();
+  formData.append("file", file);
+  const config = { headers: formData.getHeaders() };
+
+  return axios.post(
+    `https://openapi.zalo.me/v2.0/oa/upload/image?access_token=${zaloAccessToken}`,
+    formData,
+    config
+  );
 };

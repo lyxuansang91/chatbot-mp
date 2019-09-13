@@ -74,6 +74,7 @@
     "express": "^4.15.2",
     "express-formidable": "^1.2.0",
     "express-validation": "^1.0.2",
+    "form-data": "^2.5.1",
     "formidable": "^1.2.1",
     "fs": "^0.0.1-security",
     "helmet": "^3.5.0",
