@@ -110,10 +110,10 @@ handleUserMessage = async (req, res) => {
   console.log("analyzeQuery", query);
 
   switch (query.type) {
-    case "COBAN":
+    case "*":
       processCoBan(userId, query.message);
       break;
-    case "TINTUC":
+    case "#":
       processTinTuc(userId, query.message);
       break;
     case "THONGTIN":
