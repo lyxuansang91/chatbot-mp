@@ -321,7 +321,7 @@ processTinTuc = async (userId, keyword) => {
     if (links && links.length > 0) {
       sendMultipleTextLink(userId, links);
     } else {
-      sendTextMessage(userId, "Không có tin tức mới cho mã cổ phiếu này :)");
+      sendTextMessage(userId, "Không có tin tức mới cho mã cổ phiếu này :(");
     }
   }
 };
@@ -336,6 +336,10 @@ processCoBan = async (userId, keyword) => {
       sendTextMessage(userId, data.data);
     } else if (data.type === 'image') {
       sendImage(userId, "", data.attachmentId);
+    } else {
+      sendTextMessage(userId, "Không có phân tích cơ bản cho mã này :(");
     }
+  } else {
+      sendTextMessage(userId, "Không có phân tích cơ bản cho mã này :(");
   }
 }
