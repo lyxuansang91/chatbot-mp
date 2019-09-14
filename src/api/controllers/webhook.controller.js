@@ -319,7 +319,7 @@ processTinTuc = async (userId, keyword) => {
     const links = result.data;
 
     if (links && links.length > 0) {
-      sendMultipleTextLink(userId, links);
+      sendMultipleTextLink(userId, links.slice(0, 5));
     } else {
       sendTextMessage(userId, "Không có tin tức mới cho mã cổ phiếu này :(");
     }
