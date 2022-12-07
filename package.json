@@ -71,7 +71,7 @@
     "cors": "^2.8.3",
     "cross-env": "^5.0.1",
     "dotenv-safe": "^6.0.0",
-    "express": "^4.15.2",
+    "express": "^4.17.3",
     "express-formidable": "^1.2.0",
     "express-validation": "^1.0.2",
     "form-data": "^2.5.1",
